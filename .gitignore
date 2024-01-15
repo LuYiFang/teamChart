@@ -25,3 +25,6 @@
 website/src/react-app-env.d.ts
 website/src/reportWebVitals.ts
 website/src/setupTests.ts
+
+# env
+/team-chart-service/.env*
