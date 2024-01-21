@@ -9,11 +9,13 @@ import {
 import { RippleAvatar } from "../Groups/Groups";
 import { Person as PersonIcon } from "@mui/icons-material";
 import { FC } from "react";
+import _ from "lodash";
 
 const SidebarList: FC<{
   open: boolean | undefined;
   onItemClick: (name: string) => void;
-}> = ({ open, onItemClick }) => {
+  userGroup: Array<{ name: string }>;
+}> = ({ open, onItemClick, userGroup }) => {
   const generatePerson = (
     name: string,
     key: string | number,
@@ -51,8 +53,8 @@ const SidebarList: FC<{
     <>
       {generatePerson("Me", "me")}
       <Divider />
-      <List>
-        {["A", "B", "C"].map((name, index) => generatePerson(name, index))}
+      <List sx={{ overflowY: "auto" }}>
+        {_.map(userGroup, (user, index) => generatePerson(user.name, index))}
       </List>
     </>
   );

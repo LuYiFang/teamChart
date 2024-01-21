@@ -1,104 +1,53 @@
-import React, { useState } from "react";
+import React from "react";
 import "./App.css";
-import { styled, useTheme, Theme, CSSObject } from "@mui/material/styles";
 import {
-  Box,
-  Divider,
-  Grid,
-  IconButton,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemButton,
-  ListItemText,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import PersonIcon from "@mui/icons-material/Person";
-import SendIcon from "@mui/icons-material/Send";
-import { DropResult, DragDropContext } from "react-beautiful-dnd";
-import _ from "lodash";
-import Groups, { RippleAvatar } from "./Components/Groups/Groups";
-import Sidebar from "./Components/Sidebar/Sidebar";
-import MessagesBox from "./Components/Messages/MessagesBox";
-import SidebarList from "./Components/Sidebar/SidebarList";
-import GroupArea from "./Components/Groups/GroupArea";
+  Route,
+  createBrowserRouter,
+  createRoutesFromChildren,
+  defer,
+} from "react-router-dom";
+import Home from "./Pages/Home";
+import Login from "./Pages/Login";
+import { home, login, root, signup } from "./Utility/routePath";
+import PublicLayout from "./Components/PublicLayout";
+import Protectedayout from "./Components/ProtectedLayout";
+import AuthLayout from "./Components/AuthLayout";
+import { FetchApi } from "./Utility/fetchApi";
+import { api } from "./apiConifg";
+import SignUp from "./Pages/SignUp";
+import { getStorage } from "./Utility/utility";
 
-const messages = [
-  { name: "A", message: "1" },
-  { name: "A", message: "2222" },
-  { name: "B", message: "3333333" },
-  { name: "C", message: "4444444444" },
-  { name: "B", message: "5555555555555" },
-  { name: "B", message: "6666666666666666" },
-  { name: "B", message: "77777777777777777777777777" },
-];
-
-const currentUser = "A";
-
-export default function App() {
-  const [isMembersOpen, setIsMembersOpen] = useState(false);
-  const [isMessageOpen, setIsMessageOpen] = useState(false);
-  const [userGroup, setUserGroup] = useState(
-    _.map(_.uniq(_.map(messages, "name")), (name, i) => ({
-      id: `graggable-user-${name}`,
-      name: name,
-      group: `group-5`,
-    })),
+const getUsers = async (): Promise<Array<string>> => {
+  const res = await FetchApi.get(
+    api.users,
+    {},
+    {
+      headers: {
+        Authorization: getStorage("user", ""),
+      },
+    },
   );
-  const [findUser, setFindUser] = useState<string>();
+  if (res.status !== 200) {
+    return [];
+  }
+  return res.users;
+};
 
-  const onDragEnd = (res: DropResult) => {
-    const { source, destination, draggableId } = res;
+export const router = createBrowserRouter(
+  createRoutesFromChildren(
+    <Route element={<AuthLayout />}>
+      <Route element={<PublicLayout />}>
+        <Route path={root} element={<Login />} />
+        <Route path={login} element={<Login />} />
+        <Route path={signup} element={<SignUp />} />
+      </Route>
 
-    if (!destination) return;
-
-    const newUserGroup = _.map(userGroup, (user) => {
-      if (user.id !== draggableId) return user;
-
-      return {
-        ...user,
-        group: destination.droppableId,
-      };
-    });
-
-    setUserGroup(newUserGroup);
-  };
-
-  return (
-    <div className="App">
-      <Sidebar
-        isOpen={isMembersOpen}
-        onClick={() => setIsMembersOpen(!isMembersOpen)}
+      <Route
+        element={<Protectedayout />}
+        loader={() => defer({ usersPromise: getUsers() })}
       >
-        <SidebarList
-          open={isMembersOpen}
-          onItemClick={(name) => setFindUser(name)}
-        />
-      </Sidebar>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 4,
-          height: "calc(100vh - 80px)",
-          zIndex: (theme) => theme.zIndex.drawer - 2,
-        }}
-      >
-        <GroupArea
-          userGroup={userGroup}
-          findUser={findUser}
-          onDragEnd={onDragEnd}
-        />
-      </Box>
-      <Sidebar
-        anchor="right"
-        isOpen={isMessageOpen}
-        onClick={() => setIsMessageOpen(!isMessageOpen)}
-      >
-        <MessagesBox messages={messages} currentUser={currentUser} />
-      </Sidebar>
-    </div>
-  );
-}
+        <Route path={home} element={<Home />} />
+      </Route>
+    </Route>,
+  ),
+);

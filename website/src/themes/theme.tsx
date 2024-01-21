@@ -41,6 +41,13 @@ const theme = createTheme({
     //   light: '#F3F5FF'
     // }
   },
+  components: {
+    MuiButton: {
+      defaultProps: {
+        variant: "contained",
+      },
+    },
+  },
 });
 
 export default theme;

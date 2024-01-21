@@ -28,3 +28,13 @@ website/src/setupTests.ts
 
 # env
 /team-chart-service/.env*
+
+
+
+# for env
+team-chart-service/src/tmp.ts
+./**/*.js
+team-chart-service/dist/*.js
+/team-chart-service/dist
+team-chart-service/dist/index.js
+website/.env*
