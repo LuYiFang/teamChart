@@ -2,21 +2,20 @@ import {
   Await,
   Navigate,
   Outlet,
-  OutletProps,
+  useAsyncError,
   useLoaderData,
-  useOutlet,
   useOutletContext,
 } from "react-router-dom";
 import { useAuth } from "../hook/useAuth";
-import { home, root } from "../Utility/routePath";
-import React, { PropsWithChildren, ReactNode, Suspense } from "react";
-import { Alert, LinearProgress } from "@mui/material";
+import { root } from "../Utility/routePath";
+import { Suspense, useEffect } from "react";
+import { Box, CircularProgress, Typography } from "@mui/material";
+import { Alert } from "../Utility/alert";
 
 type ContextType = { users: Array<string> };
 
 const Protectedayout = () => {
   const { user } = useAuth();
-  const outlet = useOutlet();
   const { usersPromise } = useLoaderData() as {
     usersPromise: Promise<Array<string>>;
   };
@@ -26,10 +25,24 @@ const Protectedayout = () => {
   }
 
   return (
-    <Suspense fallback={<LinearProgress />}>
+    <Suspense
+      fallback={
+        <Box
+          sx={{
+            height: "100vh",
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <CircularProgress size={60} />
+        </Box>
+      }
+    >
       <Await
         resolve={usersPromise}
-        errorElement={<Alert severity="error">Wrong!!!</Alert>}
+        errorElement={<Redirecting />}
         children={(users) => (
           <>
             <Outlet context={{ users }} />
@@ -43,4 +56,17 @@ export default Protectedayout;
 
 export const useUsers = () => {
   return useOutletContext<ContextType>();
+};
+
+const Redirecting = () => {
+  const { logout } = useAuth();
+
+  const error = useAsyncError() as { message?: string };
+
+  useEffect(() => {
+    Alert.error(error?.message);
+    logout();
+  }, []);
+
+  return <Typography>Redirecting...</Typography>;
 };

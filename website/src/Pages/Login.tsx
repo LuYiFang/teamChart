@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   Checkbox,
-  Container,
   FormControlLabel,
   Grid,
   Link,
@@ -13,11 +12,12 @@ import {
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import SignupBox from "../Components/Boxes/SignupBox";
 import { Link as LinkRoute } from "react-router-dom";
-import { home, signup } from "../Utility/routePath";
+import { signup } from "../Utility/routePath";
 import { FormEvent } from "react";
 import { FetchApi } from "../Utility/fetchApi";
 import { api } from "../apiConifg";
 import { useAuth } from "../hook/useAuth";
+import { Alert } from "../Utility/alert";
 
 const Login = () => {
   const { login } = useAuth();
@@ -26,17 +26,24 @@ const Login = () => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
 
-    handleLogin(data);
+    const username = data.get("username") as string;
+    const password = data.get("password") as string;
+
+    handleLogin(username, password);
   };
 
-  const handleLogin = async (data: FormData) => {
+  const handleLogin = async (username: string, password: string) => {
     const res = await FetchApi.post(api.login, {
-      username: data.get("username"),
-      password: data.get("password"),
+      username: username,
+      password: password,
     });
+
     if (res?.token) {
       login(res?.token);
+      return;
     }
+
+    Alert.error(res.message);
   };
 
   return (

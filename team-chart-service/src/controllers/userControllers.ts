@@ -46,10 +46,13 @@ class UserController {
 
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-      const newUser = new UserModel({ username, password: hashedPassword });
-      await newUser.save();
+      let newUser = new UserModel({ username, password: hashedPassword });
+      newUser = await newUser.save();
 
-      res.status(201).json({ message: "User created successfully" });
+      const token = jwt.sign({ userId: newUser.id }, SECRET_KEY, {
+        expiresIn: "1h",
+      });
+      res.status(201).json({ token });
     } catch (error) {
       console.error("Error in signup:", error);
       res

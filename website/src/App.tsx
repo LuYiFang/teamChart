@@ -18,17 +18,23 @@ import SignUp from "./Pages/SignUp";
 import { getStorage } from "./Utility/utility";
 
 const getUsers = async (): Promise<Array<string>> => {
+  const user = getStorage("user", "");
+  if (!user) {
+    return [];
+  }
+
   const res = await FetchApi.get(
     api.users,
     {},
     {
       headers: {
-        Authorization: getStorage("user", ""),
+        Authorization: user,
       },
     },
   );
+
   if (res.status !== 200) {
-    return [];
+    throw new Error(res.message);
   }
   return res.users;
 };

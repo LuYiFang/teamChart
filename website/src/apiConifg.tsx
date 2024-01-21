@@ -6,4 +6,5 @@ export const api = {
   env: env,
   users: appRoot + "/users",
   login: appRoot + "/login",
+  signup: appRoot + "/signup",
 };

@@ -36,7 +36,10 @@ export class FetchApi {
       if (error instanceof AxiosError) {
         return {
           status: error.response?.status,
-          message: error.response?.data?.message,
+          message:
+            error.response?.data?.message ||
+            error.response?.statusText ||
+            error?.message,
         };
       } else if (typeof error === "string") {
         return {
