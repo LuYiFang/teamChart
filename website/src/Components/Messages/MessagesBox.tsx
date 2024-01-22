@@ -1,13 +1,22 @@
-import { FC } from "react";
+import { ChangeEvent, FC, useMemo, useState } from "react";
 import { Box, IconButton, Stack, TextField, Typography } from "@mui/material";
 import { RippleAvatar } from "../Groups/Groups";
 import { Person as PersonIcon, Send as SendIcon } from "@mui/icons-material";
-import { User } from "../../types/commonTypes";
+import { UserOpenInfo } from "../../types/commonTypes";
+import useWebSocket from "../../hook/useWebSocket";
+import { webSocketRoot } from "../../apiConifg";
 
 const MessagesBox: FC<{
-  messages: Array<{ name: string; message: string }>;
-  currentUser: string;
-}> = ({ messages, currentUser }) => {
+  currentUserInfo: UserOpenInfo;
+  currentGroup: string;
+}> = ({ currentUserInfo, currentGroup }) => {
+  const { sendMessage, messageGroup } = useWebSocket(webSocketRoot);
+  const [message, setMessage] = useState("");
+
+  const currentGroupMessages = useMemo(() => {
+    return messageGroup[currentGroup] || [];
+  }, [messageGroup, currentGroup]);
+
   const generateMessage = (
     name: string,
     message: string,
@@ -20,14 +29,17 @@ const MessagesBox: FC<{
         spacing={1}
         sx={{
           mx: 2,
-          alignItems: currentUser === name ? "flex-end" : "flex-start",
+          alignItems: currentUserInfo.name === name ? "flex-end" : "flex-start",
         }}
       >
         <Stack
           direction="row"
           spacing={1}
           sx={{
-            display: preName === name || name === currentUser ? "none" : "flex",
+            display:
+              preName === name || name === currentUserInfo.name
+                ? "none"
+                : "flex",
             alignItems: "center",
             pt: 2,
           }}
@@ -49,7 +61,7 @@ const MessagesBox: FC<{
             maxWidth: "100%",
             p: 1,
             backgroundColor: (theme) =>
-              currentUser === name
+              currentUserInfo.name === name
                 ? theme.palette.secondary.light
                 : theme.palette.primary.light,
           }}
@@ -71,6 +83,23 @@ const MessagesBox: FC<{
     );
   };
 
+  const handleChangeMessage = (event: ChangeEvent<HTMLInputElement>) => {
+    setMessage(event.target.value);
+  };
+
+  const handleSendMessage = () => {
+    sendMessage(
+      JSON.stringify({
+        username: currentUserInfo.name,
+        groupId: currentGroup,
+        message: message,
+        type: "newMessage",
+      }),
+    );
+
+    setMessage("");
+  };
+
   return (
     <>
       <Box
@@ -79,10 +108,12 @@ const MessagesBox: FC<{
           width: 340,
         }}
       >
-        <Box sx={{ height: "calc( 100% - 90px)", overflowY: "auto" }}>
-          {messages.map((item: any, index) => {
-            const preName = (messages[index - 1] || {}).name;
-            return generateMessage(item.name, item.message, preName, index);
+        <Box
+          sx={{ height: "calc( 100% - 90px)", overflowY: "auto", p: 2, pb: 4 }}
+        >
+          {currentGroupMessages.map((item: any, index) => {
+            const preName = (currentGroupMessages[index - 1] || {}).username;
+            return generateMessage(item.username, item.message, preName, index);
           })}
         </Box>
         <Box
@@ -114,6 +145,8 @@ const MessagesBox: FC<{
             multiline
             rows={1}
             variant="outlined"
+            value={message}
+            onChange={handleChangeMessage}
           />
           <IconButton
             sx={{
@@ -121,6 +154,7 @@ const MessagesBox: FC<{
               maxHeight: 40,
               maxWidth: 40,
             }}
+            onClick={handleSendMessage}
           >
             <SendIcon />
           </IconButton>

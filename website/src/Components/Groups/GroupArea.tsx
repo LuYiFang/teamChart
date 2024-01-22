@@ -2,13 +2,14 @@ import { Box, Grid, Theme, Typography } from "@mui/material";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import Groups from "./Groups";
 import { FC } from "react";
-import { User, findUser } from "../../types/commonTypes";
+import { User, UserOpenInfo, findUser } from "../../types/commonTypes";
 
 const GroupArea: FC<{
   userGroup: Array<User>;
   findUser: findUser;
   onDragEnd: (res: DropResult) => void;
-}> = ({ userGroup, findUser, onDragEnd }) => {
+  currentUserInfo: UserOpenInfo;
+}> = ({ userGroup, findUser, onDragEnd, currentUserInfo }) => {
   return (
     <>
       <DragDropContext onDragEnd={onDragEnd}>
@@ -34,6 +35,7 @@ const GroupArea: FC<{
                   >
                     <Groups
                       findUser={findUser}
+                      currentUserInfo={currentUserInfo}
                       groupId={`group-${index}`}
                       users={userGroup.filter(
                         (user) => user.group === `group-${index}`,

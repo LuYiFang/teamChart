@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useMemo, useState } from "react";
 import Sidebar from "../Components/Sidebar/Sidebar";
 import SidebarList from "../Components/Sidebar/SidebarList";
 import { Box } from "@mui/material";
@@ -6,26 +6,15 @@ import GroupArea from "../Components/Groups/GroupArea";
 import MessagesBox from "../Components/Messages/MessagesBox";
 import { DropResult } from "react-beautiful-dnd";
 import _ from "lodash";
-import { useOutletContext } from "react-router-dom";
 import { useUsers } from "../Components/ProtectedLayout";
-
-const messages = [
-  { name: "A", message: "1" },
-  { name: "A", message: "2222" },
-  { name: "B", message: "3333333" },
-  { name: "C", message: "4444444444" },
-  { name: "B", message: "5555555555555" },
-  { name: "B", message: "6666666666666666" },
-  { name: "B", message: "77777777777777777777777777" },
-];
-
-const currentUser = "A";
+import { useUserOpenInfo } from "../hook/useUserOpenInfo";
 
 const Home = () => {
   const { users } = useUsers();
+  const { userOpenInfo } = useUserOpenInfo();
 
   const [isMembersOpen, setIsMembersOpen] = useState(false);
-  const [isMessageOpen, setIsMessageOpen] = useState(false);
+  const [isMessageOpen, setIsMessageOpen] = useState(true);
   const [userGroup, setUserGroup] = useState(
     _.map(_.map(users, "username"), (name, i) => ({
       id: `graggable-user-${name}`,
@@ -34,6 +23,14 @@ const Home = () => {
     })),
   );
   const [findUser, setFindUser] = useState<string>();
+
+  const currentGroup = useMemo(() => {
+    const userInfo = _.find(
+      userGroup,
+      (user) => user.name === userOpenInfo.name,
+    );
+    return userInfo?.group || "";
+  }, [userOpenInfo.name, userGroup]);
 
   const onDragEnd = (res: DropResult) => {
     const { source, destination, draggableId } = res;
@@ -51,6 +48,7 @@ const Home = () => {
 
     setUserGroup(newUserGroup);
   };
+
   return (
     <>
       <div className="App">
@@ -62,6 +60,7 @@ const Home = () => {
             open={isMembersOpen}
             onItemClick={(name) => setFindUser(name)}
             userGroup={userGroup}
+            currentUserInfo={userOpenInfo}
           />
         </Sidebar>
         <Box
@@ -77,6 +76,7 @@ const Home = () => {
             userGroup={userGroup}
             findUser={findUser}
             onDragEnd={onDragEnd}
+            currentUserInfo={userOpenInfo}
           />
         </Box>
         <Sidebar
@@ -84,7 +84,10 @@ const Home = () => {
           isOpen={isMessageOpen}
           onClick={() => setIsMessageOpen(!isMessageOpen)}
         >
-          <MessagesBox messages={messages} currentUser={currentUser} />
+          <MessagesBox
+            currentUserInfo={userOpenInfo}
+            currentGroup={currentGroup}
+          />
         </Sidebar>
       </div>
     </>

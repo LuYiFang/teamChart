@@ -20,3 +20,25 @@ export interface FetchApiType {
   data?: Object;
   config?: AxiosRequestConfig;
 }
+
+export interface UserOpenInfo {
+  name: string;
+}
+
+export interface UserOpenInfoProps {
+  userOpenInfo: UserOpenInfo;
+  setUserOpenInfo: (userInfo: UserOpenInfo) => void;
+}
+
+export interface Message {
+  username: string;
+  message: string;
+  groupId: string;
+  createTime: Date;
+}
+
+export interface MessageGroup {
+  [groupId: string]: Message[];
+}
+
+export type LocalStorageValue = string | UserOpenInfo | null;

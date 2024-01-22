@@ -13,14 +13,18 @@ import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import SignupBox from "../Components/Boxes/SignupBox";
 import { Link as LinkRoute } from "react-router-dom";
 import { signup } from "../Utility/routePath";
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import { FetchApi } from "../Utility/fetchApi";
 import { api } from "../apiConifg";
 import { useAuth } from "../hook/useAuth";
 import { Alert } from "../Utility/alert";
+import { LoadingButton } from "@mui/lab";
+import { useUserOpenInfo } from "../hook/useUserOpenInfo";
 
 const Login = () => {
   const { login } = useAuth();
+  const { setUserOpenInfo } = useUserOpenInfo();
+  const [isLoading, setIsloading] = useState(false);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -29,6 +33,7 @@ const Login = () => {
     const username = data.get("username") as string;
     const password = data.get("password") as string;
 
+    setIsloading(true);
     handleLogin(username, password);
   };
 
@@ -37,12 +42,15 @@ const Login = () => {
       username: username,
       password: password,
     });
+    setIsloading(false);
 
     if (res?.token) {
+      setUserOpenInfo({ name: username });
       login(res?.token);
       return;
     }
 
+    setUserOpenInfo({ name: "" });
     Alert.error(res.message);
   };
 
@@ -80,9 +88,15 @@ const Login = () => {
             }
             label="Remember me"
           />
-          <Button type="submit" fullWidth sx={{ mt: 3, mb: 2 }}>
+          <LoadingButton
+            variant="contained"
+            loading={isLoading}
+            type="submit"
+            fullWidth
+            sx={{ mt: 3, mb: 2 }}
+          >
             Sign In
-          </Button>
+          </LoadingButton>
         </Box>
         <Grid container>
           <Grid item>

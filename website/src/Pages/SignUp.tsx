@@ -15,6 +15,7 @@ import { useAuth } from "../hook/useAuth";
 import { api } from "../apiConifg";
 import { FetchApi } from "../Utility/fetchApi";
 import { Alert } from "../Utility/alert";
+import { LoadingButton } from "@mui/lab";
 
 const SignUp = () => {
   const { login } = useAuth();
@@ -22,6 +23,7 @@ const SignUp = () => {
     username: "",
     password: "",
   });
+  const [isLoading, setIsloading] = useState(false);
 
   const isValidForm = (username: string, password: string) => {
     const newFormError = {
@@ -45,7 +47,6 @@ const SignUp = () => {
     } else if (password.length < 6 || password.length >= 16) {
       newFormError.password = "Password must be between 6 and 16 characters";
     }
-    console.log("newFormError", newFormError);
 
     setFormError(newFormError);
 
@@ -63,6 +64,7 @@ const SignUp = () => {
       return;
     }
 
+    setIsloading(true);
     handleSignup(username, password);
   };
 
@@ -71,6 +73,8 @@ const SignUp = () => {
       username: username,
       password: password,
     });
+
+    setIsloading(false);
 
     if (res?.token) {
       login(res?.token);
@@ -110,9 +114,15 @@ const SignUp = () => {
           error={formError.password !== ""}
           helperText={formError.password}
         />
-        <Button type="submit" fullWidth sx={{ mt: 3, mb: 2 }}>
+        <LoadingButton
+          variant="contained"
+          loading={isLoading}
+          type="submit"
+          fullWidth
+          sx={{ mt: 3, mb: 2 }}
+        >
           Sign Up
-        </Button>
+        </LoadingButton>
       </Box>
     </SignupBox>
   );

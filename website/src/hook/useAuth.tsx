@@ -22,7 +22,6 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const login = async (data: string) => {
     setUser(data);
-    console.log("nav");
     navigate(home);
   };
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { styled } from "@mui/material/styles";
-import { Avatar, Badge, Box } from "@mui/material";
+import { Avatar, Badge, Box, Theme } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import {
   DragDropContext,
@@ -8,22 +8,26 @@ import {
   Draggable,
   DropResult,
 } from "react-beautiful-dnd";
-import { User, findUser } from "../../types/commonTypes";
+import { User, UserOpenInfo, findUser } from "../../types/commonTypes";
+import { useUserOpenInfo } from "../../hook/useUserOpenInfo";
 
 type PersonProps = {
   index: number;
   user: User;
   findUser: findUser;
+  currentUserInfo: UserOpenInfo;
 };
 
 type MessageProps = {
   findUser: findUser;
   users: Array<User>;
   groupId: string;
+  currentUserInfo: UserOpenInfo;
 };
 
 type RippleAvatarProps = {
   active?: string | undefined;
+  iscurrentuser?: string;
 };
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
@@ -40,10 +44,14 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 export const RippleAvatar = styled(Avatar)<RippleAvatarProps>(({
   theme,
   active,
+  iscurrentuser,
 }) => {
   return {
     "&": {
-      backgroundColor: theme.palette.secondary.main,
+      backgroundColor:
+        iscurrentuser == "true"
+          ? theme.palette.primary.light
+          : theme.palette.secondary.main,
       ...(active && { boxShadow: "0 0 7px #000" }),
     },
     ...(active && {
@@ -72,7 +80,12 @@ export const RippleAvatar = styled(Avatar)<RippleAvatarProps>(({
   };
 });
 
-const Person: React.FC<PersonProps> = ({ findUser, user, index }) => {
+const Person: React.FC<PersonProps> = ({
+  findUser,
+  user,
+  index,
+  currentUserInfo,
+}) => {
   return (
     <Draggable draggableId={user.id} index={index}>
       {(provided) => {
@@ -81,6 +94,7 @@ const Person: React.FC<PersonProps> = ({ findUser, user, index }) => {
             ref={provided.innerRef}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
+            style={{ maxHeight: 46, ...provided.draggableProps.style }}
           >
             <StyledBadge
               overlap="circular"
@@ -89,6 +103,7 @@ const Person: React.FC<PersonProps> = ({ findUser, user, index }) => {
             >
               <RippleAvatar
                 active={findUser === user.name ? "true" : undefined}
+                iscurrentuser={(user.name === currentUserInfo.name).toString()}
               >
                 {user.name}
               </RippleAvatar>
@@ -100,7 +115,12 @@ const Person: React.FC<PersonProps> = ({ findUser, user, index }) => {
   );
 };
 
-const Groups: React.FC<MessageProps> = ({ findUser, users, groupId }) => {
+const Groups: React.FC<MessageProps> = ({
+  findUser,
+  users,
+  groupId,
+  currentUserInfo,
+}) => {
   return (
     <Droppable droppableId={`${groupId}`}>
       {(provided, snapshot) => {
@@ -108,13 +128,20 @@ const Groups: React.FC<MessageProps> = ({ findUser, users, groupId }) => {
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            style={{ width: "100%", height: "100%" }}
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "flex-start",
+            }}
           >
             {users.map((user, index) => {
               return (
                 <Person
                   key={`person-${user.name}`}
                   findUser={findUser}
+                  currentUserInfo={currentUserInfo}
                   user={user}
                   index={index}
                 />

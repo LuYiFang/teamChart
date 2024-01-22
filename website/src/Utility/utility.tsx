@@ -1,4 +1,6 @@
-export const getStorage = (key: string, defaultValue?: string | null) => {
+import { LocalStorageValue } from "../types/commonTypes";
+
+export const getStorage = (key: string, defaultValue: LocalStorageValue) => {
   try {
     const value = window.localStorage.getItem(key);
     if (value) {
