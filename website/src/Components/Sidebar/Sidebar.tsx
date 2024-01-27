@@ -12,6 +12,7 @@ const messageWidth = 340;
 type SidbarComponentProps = React.PropsWithChildren<{
   anchor?: "bottom" | "left" | "right" | "top" | undefined;
   isOpen: boolean;
+  hidden?: boolean;
   onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }>;
 
@@ -116,11 +117,12 @@ const OpenTab: React.FC<SidbarComponentProps> = (props) => {
 };
 
 const Sidebar: React.FC<SidbarComponentProps> = (props) => {
-  const { anchor = "left", isOpen, onClick } = props;
+  const { anchor = "left", isOpen, hidden = false, onClick } = props;
 
   return (
     <>
       <Drawer
+        hidden={hidden}
         open={isOpen}
         anchor={anchor}
         variant="permanent"

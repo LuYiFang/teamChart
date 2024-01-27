@@ -8,6 +8,7 @@ import { DropResult } from "react-beautiful-dnd";
 import _ from "lodash";
 import { useUsers } from "../Components/ProtectedLayout";
 import { useUserOpenInfo } from "../hook/useUserOpenInfo";
+import { groupList, groupSilence } from "../Utility/contants";
 
 const Home = () => {
   const { users } = useUsers();
@@ -19,7 +20,7 @@ const Home = () => {
     _.map(_.map(users, "username"), (name, i) => ({
       id: `graggable-user-${name}`,
       name: name,
-      group: `group-5`,
+      group: groupSilence,
     })),
   );
   const [findUser, setFindUser] = useState<string>();
@@ -82,6 +83,7 @@ const Home = () => {
         <Sidebar
           anchor="right"
           isOpen={isMessageOpen}
+          hidden={currentGroup === groupSilence ? true : false}
           onClick={() => setIsMessageOpen(!isMessageOpen)}
         >
           <MessagesBox

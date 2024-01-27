@@ -1,21 +1,58 @@
-import { ChangeEvent, FC, useMemo, useState } from "react";
-import { Box, IconButton, Stack, TextField, Typography } from "@mui/material";
+import {
+  ChangeEvent,
+  FC,
+  KeyboardEventHandler,
+  KeyboardEvent,
+  SyntheticEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  Alert,
+  Box,
+  IconButton,
+  Slide,
+  SlideProps,
+  Snackbar,
+  SnackbarCloseReason,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { RippleAvatar } from "../Groups/Groups";
-import { Person as PersonIcon, Send as SendIcon } from "@mui/icons-material";
+import {
+  Clear as ClearIcon,
+  Person as PersonIcon,
+  Send as SendIcon,
+} from "@mui/icons-material";
 import { UserOpenInfo } from "../../types/commonTypes";
 import useWebSocket from "../../hook/useWebSocket";
 import { webSocketRoot } from "../../apiConifg";
+import { groupPublic } from "../../Utility/contants";
 
 const MessagesBox: FC<{
   currentUserInfo: UserOpenInfo;
   currentGroup: string;
 }> = ({ currentUserInfo, currentGroup }) => {
   const { sendMessage, messageGroup } = useWebSocket(webSocketRoot);
+  const [textValue, setTextValue] = useState("");
   const [message, setMessage] = useState("");
+  const [isBroadcastOpen, setIsBroadcastOpen] = useState(false);
+
+  const boxRef = useRef<HTMLDivElement>(null);
 
   const currentGroupMessages = useMemo(() => {
     return messageGroup[currentGroup] || [];
   }, [messageGroup, currentGroup]);
+
+  useEffect(() => {
+    if (!boxRef.current) return;
+
+    boxRef.current.scrollTop = boxRef.current.scrollHeight;
+  }, [currentGroupMessages]);
 
   const generateMessage = (
     name: string,
@@ -85,7 +122,19 @@ const MessagesBox: FC<{
 
   const handleChangeMessage = (event: ChangeEvent<HTMLInputElement>) => {
     setMessage(event.target.value);
+    setTextValue(event.target.value);
   };
+
+  const handleKeyUp = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+
+        handleSendMessage();
+      }
+    },
+    [message, currentGroup, currentUserInfo.name],
+  );
 
   const handleSendMessage = () => {
     sendMessage(
@@ -97,7 +146,35 @@ const MessagesBox: FC<{
       }),
     );
 
-    setMessage("");
+    setTextValue("");
+    handlePublicBroadcast();
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) event.preventDefault();
+  };
+
+  const handlePublicBroadcast = () => {
+    if (currentGroup !== groupPublic) return;
+
+    setIsBroadcastOpen(true);
+  };
+
+  const handleBroadcastClose = () => {
+    setIsBroadcastOpen(false);
+  };
+
+  const SlideTransition = (props: SlideProps) => {
+    return <Slide {...props} direction="down" />;
+  };
+
+  const handleClose = (
+    event: Event | SyntheticEvent,
+    reason: SnackbarCloseReason,
+  ) => {
+    console.log("reason", reason);
+    if (reason === "clickaway") return;
+    setIsBroadcastOpen(false);
   };
 
   return (
@@ -109,8 +186,15 @@ const MessagesBox: FC<{
         }}
       >
         <Box
-          sx={{ height: "calc( 100% - 90px)", overflowY: "auto", p: 2, pb: 4 }}
+          ref={boxRef}
+          sx={{
+            height: "calc( 100% - 90px - 16px - 32px)",
+            overflowY: "auto",
+            p: 2,
+            pb: 4,
+          }}
         >
+          <Typography variant="h5">{currentGroup}</Typography>
           {currentGroupMessages.map((item: any, index) => {
             const preName = (currentGroupMessages[index - 1] || {}).username;
             return generateMessage(item.username, item.message, preName, index);
@@ -135,6 +219,8 @@ const MessagesBox: FC<{
                 color: (theme) => theme.palette.text.primary,
                 backgroundColor: (theme) => theme.palette.primary.light,
               },
+              onKeyUp: handleKeyUp,
+              onKeyDown: handleKeyDown,
             }}
             sx={{
               "&": {
@@ -145,7 +231,7 @@ const MessagesBox: FC<{
             multiline
             rows={1}
             variant="outlined"
-            value={message}
+            value={textValue}
             onChange={handleChangeMessage}
           />
           <IconButton
@@ -160,6 +246,43 @@ const MessagesBox: FC<{
           </IconButton>
         </Box>
       </Box>
+      <Snackbar
+        open={isBroadcastOpen}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        autoHideDuration={6000}
+        onClose={handleClose}
+        TransitionComponent={SlideTransition}
+        key={message}
+      >
+        <Alert
+          severity="info"
+          action={
+            <IconButton sx={{ color: "white" }} onClick={handleBroadcastClose}>
+              <ClearIcon />
+            </IconButton>
+          }
+          sx={{
+            "& .MuiAlert-action": {
+              pt: 0,
+            },
+            "&": {
+              backgroundColor: (theme) => theme.palette.primary.dark,
+              color: "white",
+            },
+            "& .MuiAlert-icon": {
+              color: "white",
+            },
+            "& .MuiAlert-message": {
+              whiteSpace: "pre-wrap",
+              overflowWrap: "break-word",
+              maxWidth: "70vw",
+              textAlign: "left",
+            },
+          }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
     </>
   );
 };
