@@ -5,6 +5,7 @@ export type User = {
   id: string;
   name: string;
   group: string;
+  status: OnlineStatus;
 };
 
 export type findUser = string | undefined | null;
@@ -52,7 +53,7 @@ export interface VerticalTabsComponentProps extends PropsWithChildren {
 export interface SidbarComponentProps extends PropsWithChildren {
   anchor?: "bottom" | "left" | "right" | "top" | undefined;
   isOpen: boolean;
-  hidden?: boolean;
+  disabledMessage?: boolean;
   onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
@@ -63,7 +64,7 @@ export interface SidbarTabComponentProps
   currentGroup: string;
   sendMessage: (message: string) => void;
   messageGroup: MessageGroup;
-  loginUserList: Array<string>;
+  userGroup: Array<User>;
   wishList: Array<Wish>;
 }
 
@@ -79,4 +80,20 @@ export type WishCardProps = React.PropsWithChildren<{
   voteCount: number;
   name: string;
   content: string;
+  userMap: UserMap;
 }>;
+
+export enum OnlineStatus {
+  Online = "online",
+  Offline = "offline",
+}
+
+export type RippleAvatarProps = {
+  active?: string | undefined;
+  iscurrentuser?: string;
+  status?: OnlineStatus | undefined;
+};
+
+export type UserMap = {
+  [name: string]: User;
+};

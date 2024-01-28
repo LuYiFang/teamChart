@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import { router } from "./App";
 import reportWebVitals from "./reportWebVitals";
-import { ThemeProvider } from "@mui/material";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 import theme from "./themes/theme";
 import { RouterProvider } from "react-router-dom";
 
@@ -12,6 +12,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <ThemeProvider theme={theme}>
+    <CssBaseline />
     <RouterProvider router={router}></RouterProvider>
   </ThemeProvider>,
 );

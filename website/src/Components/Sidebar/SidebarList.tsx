@@ -6,21 +6,28 @@ import {
   ListItemButton,
   ListItemText,
 } from "@mui/material";
-import { RippleAvatar } from "../Groups/Groups";
 import { Person as PersonIcon } from "@mui/icons-material";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import _ from "lodash";
-import { UserOpenInfo } from "../../types/commonTypes";
+import { OnlineStatus, User, UserOpenInfo } from "../../types/commonTypes";
+import Sidebar from "./Sidebar";
+import RippleAvatar from "../Avatars/RippleAvatar";
 
 const SidebarList: FC<{
-  open: boolean | undefined;
+  open: boolean;
   onItemClick: (name: string) => void;
-  userGroup: Array<{ name: string }>;
+  userGroup: Array<User>;
   currentUserInfo: UserOpenInfo;
-}> = ({ open, onItemClick, userGroup, currentUserInfo }) => {
+  onClick: () => void;
+}> = ({ open, onItemClick, userGroup, currentUserInfo, onClick }) => {
+  const otherUserList = useMemo(() => {
+    return _.filter(userGroup, (user) => user.name !== currentUserInfo.name);
+  }, [userGroup]);
+
   const generatePerson = (
     name: string,
     key: string | number,
+    status?: OnlineStatus,
   ): React.ReactElement => {
     return (
       <ListItem key={`sidebar-item-${key}`}>
@@ -37,9 +44,7 @@ const SidebarList: FC<{
               justifyContent: "center",
             }}
           >
-            <RippleAvatar>
-              <PersonIcon />
-            </RippleAvatar>
+            <RippleAvatar status={status}>{name}</RippleAvatar>
           </ListItemAvatar>
           <ListItemText
             primary={name}
@@ -53,11 +58,19 @@ const SidebarList: FC<{
 
   return (
     <>
-      {generatePerson(currentUserInfo.name, currentUserInfo.name)}
-      <Divider />
-      <List sx={{ overflowY: "auto" }}>
-        {_.map(userGroup, (user, index) => generatePerson(user.name, index))}
-      </List>
+      <Sidebar isOpen={open} onClick={onClick}>
+        {generatePerson(
+          currentUserInfo.name,
+          currentUserInfo.name,
+          OnlineStatus.Online,
+        )}
+        <Divider />
+        <List sx={{ overflowY: "auto" }}>
+          {_.map(otherUserList, (user, index) =>
+            generatePerson(user.name, index, user.status),
+          )}
+        </List>
+      </Sidebar>
     </>
   );
 };

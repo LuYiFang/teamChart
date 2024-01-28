@@ -8,14 +8,22 @@ import {
   Draggable,
   DropResult,
 } from "react-beautiful-dnd";
-import { User, UserOpenInfo, findUser } from "../../types/commonTypes";
+import {
+  OnlineStatus,
+  User,
+  UserOpenInfo,
+  findUser,
+} from "../../types/commonTypes";
 import { useUserOpenInfo } from "../../hook/useUserOpenInfo";
+import _ from "lodash";
+import RippleAvatar from "../Avatars/RippleAvatar";
 
 type PersonProps = {
   index: number;
   user: User;
   findUser: findUser;
   currentUserInfo: UserOpenInfo;
+  status: OnlineStatus;
 };
 
 type MessageProps = {
@@ -25,66 +33,12 @@ type MessageProps = {
   currentUserInfo: UserOpenInfo;
 };
 
-type RippleAvatarProps = {
-  active?: string | undefined;
-  iscurrentuser?: string;
-};
-
-const StyledBadge = styled(Badge)(({ theme }) => ({
-  "&": {
-    margin: 3,
-  },
-  "& .MuiBadge-badge": {
-    backgroundColor: "#44b700",
-    color: "#44b700",
-    boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
-  },
-}));
-
-export const RippleAvatar = styled(Avatar)<RippleAvatarProps>(({
-  theme,
-  active,
-  iscurrentuser,
-}) => {
-  return {
-    "&": {
-      backgroundColor:
-        iscurrentuser == "true"
-          ? theme.palette.primary.light
-          : theme.palette.secondary.main,
-      ...(active && { boxShadow: "0 0 7px #000" }),
-    },
-    ...(active && {
-      "&::after": {
-        position: "absolute",
-        top: -2,
-        left: -2,
-        width: "100%",
-        height: "100%",
-        borderRadius: "50%",
-        animation: "ripple 1.2s infinite ease-in-out",
-        border: "2px solid currentColor",
-        content: '""',
-      },
-    }),
-    "@keyframes ripple": {
-      "0%": {
-        transform: "scale(.2)",
-        opacity: 1,
-      },
-      "100%": {
-        transform: "scale(1.5)",
-        opacity: 0,
-      },
-    },
-  };
-});
-
 const Person: React.FC<PersonProps> = ({
   findUser,
   user,
   index,
   currentUserInfo,
+  status,
 }) => {
   return (
     <Draggable draggableId={user.id} index={index}>
@@ -96,18 +50,13 @@ const Person: React.FC<PersonProps> = ({
             {...provided.dragHandleProps}
             style={{ maxHeight: 46, ...provided.draggableProps.style }}
           >
-            <StyledBadge
-              overlap="circular"
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              variant="dot"
+            <RippleAvatar
+              status={status}
+              active={findUser === user.name ? "true" : undefined}
+              iscurrentuser={(user.name === currentUserInfo.name).toString()}
             >
-              <RippleAvatar
-                active={findUser === user.name ? "true" : undefined}
-                iscurrentuser={(user.name === currentUserInfo.name).toString()}
-              >
-                {user.name}
-              </RippleAvatar>
-            </StyledBadge>
+              {user.name}
+            </RippleAvatar>
           </div>
         );
       }}
@@ -144,6 +93,7 @@ const Groups: React.FC<MessageProps> = ({
                   currentUserInfo={currentUserInfo}
                   user={user}
                   index={index}
+                  status={user.status}
                 />
               );
             })}

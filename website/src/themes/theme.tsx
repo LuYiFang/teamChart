@@ -13,35 +13,27 @@ const theme = createTheme({
       light: 0.6,
       dark: 0.4,
     },
-    // tertiary: {
-    //     main: "#AA9BBF",
-    // },
-    // fourthiary: {
-    //     main: "#F26E50",
-    // },
-    // warning: {
-    //   main: "#F26E50",
-    // },
-    // success: {
-    //   main: "#7275A6",
-    // },
-    // info: {
-    //   main: info,
-
-    // },
-    // buttonPrimary: {
-    //   main: button,
-
-    // },
     text: {
       primary: "#2C3759",
     },
-    // background: {
-    //   default: '#F6F7FF',
-    //   light: '#F3F5FF'
-    // }
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        "*::-webkit-scrollbar": {
+          width: "5px",
+        },
+        "*::-webkit-scrollbar-track": {
+          background: "#525477",
+        },
+        "*::-webkit-scrollbar-thumb": {
+          background: "#a0a3dd",
+        },
+        "*::-webkit-scrollbar-thumb:hover": {
+          background: "#a0a3dd",
+        },
+      },
+    },
     MuiButton: {
       defaultProps: {
         variant: "contained",

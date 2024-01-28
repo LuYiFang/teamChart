@@ -1,19 +1,16 @@
-import { FC, useEffect, useMemo, useState } from "react";
-import Sidebar from "../Components/Sidebar/Sidebar";
+import { useEffect, useMemo, useState } from "react";
 import SidebarList from "../Components/Sidebar/SidebarList";
 import { Box } from "@mui/material";
 import GroupArea from "../Components/Groups/GroupArea";
-import MessagesBox from "../Components/Messages/MessagesBox";
 import { DropResult } from "react-beautiful-dnd";
 import _ from "lodash";
 import { useUsers } from "../Components/ProtectedLayout";
 import { useUserOpenInfo } from "../hook/useUserOpenInfo";
-import { groupList, groupSilence } from "../Utility/contants";
-import TabPanel from "../Components/Tab/TabPanel";
-import WishBoard from "../Components/Boxes/WishBoard";
+import { groupSilence } from "../Utility/contants";
 import SidebarTab from "../Components/Sidebar/SibebarTab";
 import useWebSocket from "../hook/useWebSocket";
 import { webSocketRoot } from "../apiConifg";
+import { OnlineStatus, User } from "../types/commonTypes";
 
 const Home = () => {
   const { users } = useUsers();
@@ -26,13 +23,7 @@ const Home = () => {
 
   const [isMembersOpen, setIsMembersOpen] = useState(false);
   const [isMessageOpen, setIsMessageOpen] = useState(true);
-  const [userGroup, setUserGroup] = useState(
-    _.map(_.map(users, "username"), (name, i) => ({
-      id: `graggable-user-${name}`,
-      name: name,
-      group: groupSilence,
-    })),
-  );
+  const [userGroup, setUserGroup] = useState<Array<User>>([]);
   const [findUser, setFindUser] = useState<string>();
   const [tabIndex, setTabIndex] = useState(0);
 
@@ -43,6 +34,29 @@ const Home = () => {
     );
     return userInfo?.group || "";
   }, [userOpenInfo.name, userGroup]);
+
+  useEffect(() => {
+    let loginUserMap: { [key: string]: boolean } = {};
+    if (loginUserList && loginUserList.length >= 0) {
+      loginUserMap = _.zipObject(
+        loginUserList,
+        Array(loginUserList.length).fill(true),
+      );
+    }
+
+    setUserGroup(
+      _.map(_.map(users, "username"), (name, i) => ({
+        id: `graggable-user-${name}`,
+        name: name,
+        group: groupSilence,
+        status: loginUserMap[name] ? OnlineStatus.Online : OnlineStatus.Offline,
+      })),
+    );
+  }, [users, loginUserList]);
+
+  useEffect(() => {
+    setTabIndex(currentGroup === groupSilence ? 1 : 0);
+  }, [currentGroup]);
 
   const onDragEnd = (res: DropResult) => {
     const { source, destination, draggableId } = res;
@@ -68,17 +82,14 @@ const Home = () => {
   return (
     <>
       <div className="App">
-        <Sidebar
-          isOpen={isMembersOpen}
+        <SidebarList
+          open={isMembersOpen}
+          onItemClick={(name) => setFindUser(name)}
+          userGroup={userGroup}
+          currentUserInfo={userOpenInfo}
           onClick={() => setIsMembersOpen(!isMembersOpen)}
-        >
-          <SidebarList
-            open={isMembersOpen}
-            onItemClick={(name) => setFindUser(name)}
-            userGroup={userGroup}
-            currentUserInfo={userOpenInfo}
-          />
-        </Sidebar>
+        />
+
         <Box
           component="main"
           sx={{
@@ -98,7 +109,7 @@ const Home = () => {
         <SidebarTab
           anchor="right"
           isOpen={isMessageOpen}
-          hidden={currentGroup === groupSilence ? true : false}
+          disabledMessage={currentGroup === groupSilence ? true : false}
           onClick={() => setIsMessageOpen(!isMessageOpen)}
           tabIndex={tabIndex}
           onChange={handleTab}
@@ -106,7 +117,7 @@ const Home = () => {
           currentGroup={currentGroup}
           sendMessage={sendMessage}
           messageGroup={messageGroup}
-          loginUserList={loginUserList}
+          userGroup={userGroup}
           wishList={wishList}
         />
       </div>

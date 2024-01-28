@@ -2,6 +2,7 @@ import React from "react";
 import { styled, Theme, CSSObject } from "@mui/material/styles";
 import MuiDrawer from "@mui/material/Drawer";
 import { SidbarComponentProps } from "../../types/commonTypes";
+import OpenTab from "../Tab/OpenTab";
 
 const memberWidth = 240;
 const messageWidth = 340;
@@ -54,17 +55,17 @@ const Drawer = styled(MuiDrawer, {
 });
 
 const Sidebar: React.FC<SidbarComponentProps> = (props) => {
-  const { anchor = "left", isOpen, hidden = false, children } = props;
+  const { anchor = "left", isOpen, children, onClick } = props;
 
   return (
     <>
       <Drawer
-        hidden={hidden}
         open={isOpen}
         anchor={anchor}
         variant="permanent"
         PaperProps={{ style: { overflow: "visible" } }}
       >
+        <OpenTab anchor={anchor} isOpen={isOpen} onClick={onClick} />
         {children}
       </Drawer>
     </>

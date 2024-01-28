@@ -1,20 +1,18 @@
 import { Box, Tab } from "@mui/material";
-import OpenTab from "../Tab/OpenTab";
 import VerticlTabs from "../Tab/VerticalTabs";
 import _ from "lodash";
 import Sidebar from "./Sidebar";
-import { FC } from "react";
-import { SidbarTabComponentProps } from "../../types/commonTypes";
-import { sidebarTabList } from "../../Utility/contants";
+import { FC, useEffect, useState } from "react";
+import { SidbarTabComponentProps, User } from "../../types/commonTypes";
+import { messageTabName, sidebarTabList } from "../../Utility/contants";
 import MessagesBox from "../Messages/MessagesBox";
 import WishBoard from "../Boxes/WishBoard";
 import TabPanel from "../Tab/TabPanel";
 
 const SidebarTab: FC<SidbarTabComponentProps> = (props) => {
   const {
-    anchor = "left",
     isOpen,
-    hidden = false,
+    disabledMessage = false,
     onClick,
     tabIndex = 0,
     onChange = () => {},
@@ -22,29 +20,45 @@ const SidebarTab: FC<SidbarTabComponentProps> = (props) => {
     currentGroup,
     sendMessage,
     messageGroup,
-    loginUserList,
+    userGroup,
     wishList,
   } = props;
 
-  const tabList = [
+  const [userMap, setUserMap] = useState({});
+
+  const tabContentList = [
     <MessagesBox
       currentUserInfo={userOpenInfo}
       currentGroup={currentGroup}
       sendMessage={sendMessage}
       messageGroup={messageGroup}
+      userMap={userMap}
     />,
-    <WishBoard wishList={wishList} currentUserInfo={userOpenInfo} />,
+    <WishBoard
+      wishList={wishList}
+      currentUserInfo={userOpenInfo}
+      userMap={userMap}
+    />,
   ];
+
+  useEffect(() => {
+    setUserMap(
+      _.mapValues(
+        _.groupBy(userGroup, "name"),
+        (group) => _.first(group) as User,
+      ),
+    );
+  }, [userGroup]);
 
   return (
     <>
-      <Sidebar anchor="right" isOpen={isOpen} hidden={hidden} onClick={onClick}>
-        <OpenTab anchor={anchor} isOpen={isOpen} onClick={onClick} />
+      <Sidebar anchor="right" isOpen={isOpen} onClick={onClick}>
         <VerticlTabs tabIndex={tabIndex} onChange={onChange}>
           {_.map(sidebarTabList, (tabName, i) => {
             return (
               <Tab
                 label={tabName}
+                disabled={disabledMessage && tabName === messageTabName}
                 key={`vertical-tab-${i}`}
                 sx={{
                   "&": {
@@ -70,14 +84,14 @@ const SidebarTab: FC<SidbarTabComponentProps> = (props) => {
           })}
         </VerticlTabs>
         <Box sx={{ width: "100%" }}>
-          {_.map(tabList, (tab, i) => {
+          {_.map(tabContentList, (tabContent, i) => {
             return (
               <TabPanel
                 value={tabIndex}
                 index={i}
                 key={`vertical-tab-panel-${i}`}
               >
-                {tab}
+                {tabContent}
               </TabPanel>
             );
           })}

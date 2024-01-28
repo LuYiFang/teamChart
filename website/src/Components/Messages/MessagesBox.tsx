@@ -21,21 +21,29 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { RippleAvatar } from "../Groups/Groups";
 import {
   Clear as ClearIcon,
   Person as PersonIcon,
   Send as SendIcon,
 } from "@mui/icons-material";
-import { MessageGroup, UserOpenInfo } from "../../types/commonTypes";
+import { MessageGroup, UserMap, UserOpenInfo } from "../../types/commonTypes";
 import { groupPublic } from "../../Utility/contants";
+import _ from "lodash";
+import RippleAvatar from "../Avatars/RippleAvatar";
 
 const MessagesBox: FC<{
   currentUserInfo: UserOpenInfo;
   currentGroup: string;
   sendMessage: (message: string) => void;
   messageGroup: MessageGroup;
-}> = ({ currentUserInfo, currentGroup, sendMessage, messageGroup }) => {
+  userMap: UserMap;
+}> = ({
+  currentUserInfo,
+  currentGroup,
+  sendMessage,
+  messageGroup,
+  userMap,
+}) => {
   const [textValue, setTextValue] = useState("");
   const [message, setMessage] = useState("");
   const [isBroadcastOpen, setIsBroadcastOpen] = useState(false);
@@ -79,9 +87,7 @@ const MessagesBox: FC<{
             pt: 2,
           }}
         >
-          <RippleAvatar>
-            <PersonIcon />
-          </RippleAvatar>
+          <RippleAvatar status={userMap[name]?.status}>{name}</RippleAvatar>
           <Typography sx={{ fontWeight: "bold" }}>{name}</Typography>
         </Stack>
 

@@ -15,7 +15,13 @@ import PersonIcon from "@mui/icons-material/Person";
 import PlusOneIcon from "@mui/icons-material/PlusOne";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import _ from "lodash";
-import { UserOpenInfo, Wish, WishCardProps } from "../../types/commonTypes";
+import {
+  UserMap,
+  UserOpenInfo,
+  Wish,
+  WishCardProps,
+} from "../../types/commonTypes";
+import RippleAvatar from "../Avatars/RippleAvatar";
 
 const StyledBadge = styled(Badge)<BadgeProps>(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -31,15 +37,14 @@ const WishCard: FC<WishCardProps> = ({
   voteCount,
   name,
   content,
+  userMap,
 }) => {
   return (
     <>
       <Card>
         <CardHeader
           avatar={
-            <Avatar>
-              <PersonIcon />
-            </Avatar>
+            <RippleAvatar status={userMap[name]?.status}>{name}</RippleAvatar>
           }
           titleTypographyProps={{
             sx: {
@@ -75,7 +80,8 @@ const WishCard: FC<WishCardProps> = ({
 const WishBoard: FC<{
   wishList: Array<Wish>;
   currentUserInfo: UserOpenInfo;
-}> = ({ wishList, currentUserInfo }) => {
+  userMap: UserMap;
+}> = ({ wishList, currentUserInfo, userMap }) => {
   return (
     <>
       <Stack spacing={2} p={3}>
@@ -87,6 +93,7 @@ const WishBoard: FC<{
               name={item.username}
               content={item.content}
               voteCount={item.voteCount}
+              userMap={userMap}
             />
           );
         })}

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { SECRET_KEY, saltRounds } from "../utils/constants";
-import UserModel from "./userModel";
+import UserModel from "../models/userModel";
 
 class UserController {
   async login(req: Request, res: Response) {
@@ -49,9 +49,13 @@ class UserController {
       let newUser = new UserModel({ username, password: hashedPassword });
       newUser = await newUser.save();
 
-      const token = jwt.sign({ userId: newUser.id }, SECRET_KEY, {
-        expiresIn: "1h",
-      });
+      const token = jwt.sign(
+        { userId: newUser.id, username: username },
+        SECRET_KEY,
+        {
+          expiresIn: "1h",
+        },
+      );
       res.status(201).json({ token });
     } catch (error) {
       console.error("Error in signup:", error);
@@ -83,7 +87,7 @@ class UserController {
 
       res.json({ users });
     } catch (error) {
-      console.error("Error in login:", error);
+      console.error("Error in users", error);
       res
         .status(500)
         .json({ success: false, message: "Internal server error" });
