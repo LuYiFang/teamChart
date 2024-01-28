@@ -1,32 +1,104 @@
 import { WebSocket, Server as WebSocketServer } from "ws";
-import MessageModel from "./controllers/messageModel";
+import MessageModel from "./models/messageModel";
 import { verifyToken } from "./utils/auth";
 import _, { compact } from "lodash";
-import UserModel from "./controllers/userModel";
+import UserModel from "./models/userModel";
+import ChartController from "./controllers/chartControllers";
 
 const userSocketMap = new Map<string, WebSocket>();
+let wssInstance: WebSocketServer | null = null;
+
+const chartController = new ChartController();
 
 export const setupWebsocket = (wss: WebSocketServer) => {
+  wssInstance = wss;
+
   wss.on("connection", async (ws, req) => {
     console.log("ws client connected");
 
-    broadcastAllGroupHistory(ws);
-
     ws.on("message", async (message) => {
-      console.log(`Received message: ${message}`);
+      // console.log(`Received message: ${message}`);
 
       try {
         const messageString = message.toString();
         const data = JSON.parse(messageString);
 
-        new MessageModel({
-          username: data.username,
-          groupId: data.groupId,
-          message: data.message,
-        }).save();
+        if (data.type === "initail") {
+          const { isSuccess, result } = await verifyToken(data.token);
+          if (!isSuccess) {
+            ws.send(
+              JSON.stringify({
+                type: "initailFailed",
+                message: `${result}`,
+              }),
+            );
+            ws.close();
+            return;
+          }
+
+          broadcastAllGroupHistory(ws);
+          broadcastWishHistory(ws);
+
+          const { username } = result as { userId: string; username: string };
+          userSocketMap.set(username, ws);
+
+          broadcastToAll(
+            wss,
+            ws,
+            {
+              type: "loginEvent",
+              username: username,
+            },
+            false,
+          );
+          return;
+        }
 
         if (data.type === "newMessage") {
-          broadcastToOthers(wss, data.username, data.message, data.groupId);
+          broadcastToAll(wss, ws, {
+            type: "newMessage",
+            groupId: data.groupId,
+            message: data.message,
+            username: data.username,
+          });
+
+          chartController.saveMessage(
+            data.username,
+            data.groupId,
+            data.message,
+          );
+
+          return;
+        }
+
+        if (data.type === "newWish") {
+          broadcastToAll(wss, ws, {
+            type: "newWish",
+            content: data.content,
+            username: data.username,
+          });
+
+          chartController.saveOpenWishBoard(data.username, data.content);
+
+          return;
+        }
+
+        if (data.type === "voteWish") {
+          broadcastToAll(wss, ws, {
+            type: "voteWish",
+            wishId: data.wishId,
+            username: data.username,
+          });
+
+          chartController.voteWish(data.username, data.wishId);
+          return;
+        }
+
+        if (data.type === "logingReturnEvent") {
+          broadcastTo(data.targetUser, {
+            type: "logingReturnEvent",
+            username: data.username,
+          });
           return;
         }
       } catch (error) {
@@ -45,38 +117,49 @@ export const setupWebsocket = (wss: WebSocketServer) => {
   });
 };
 
-const broadcastToOthers = (
+const broadcastToAll = (
   wss: WebSocketServer,
-  username: string,
-  message: string,
-  groupId: string,
+  sender: WebSocket,
+  data: Record<string, any>,
+  includeSelf: boolean = true,
 ) => {
   wss.clients.forEach((client) => {
-    if (/*client !== sender &&*/ client.readyState === WebSocket.OPEN) {
-      console.log("broadcast");
-      client.send(
-        JSON.stringify({
-          type: "newMessage",
-          groupId: groupId,
-          message: message,
-          username: username,
-        }),
-      );
+    let cond = true;
+    if (includeSelf) cond = client !== sender;
+    if (cond && client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(data));
     }
   });
 };
 
+const broadcastTo = (targetUser: string, data: Record<string, any>) => {
+  const ws = userSocketMap.get(targetUser);
+
+  if (!ws) {
+    console.log("broadcast to failed");
+    return;
+  }
+  ws.send(JSON.stringify(data));
+};
+
 const broadcastAllGroupHistory = async (ws: WebSocket) => {
-  const messages = await MessageModel.find({})
-    .sort({ createTime: -1 })
-    .limit(50)
-    .select({ username: 1, message: 1, groupId: 1, createTime: 1, _id: 0 })
-    .sort({ createTime: 1 });
+  const messageList = await chartController.getAllMessageHistory();
 
   ws.send(
     JSON.stringify({
       type: "allMessage",
-      data: _.groupBy(messages, "groupId"),
+      data: _.groupBy(messageList, "groupId"),
+    }),
+  );
+};
+
+const broadcastWishHistory = async (ws: WebSocket) => {
+  const wishList = await chartController.getOpenWishBoard();
+
+  ws.send(
+    JSON.stringify({
+      type: "openWish",
+      data: wishList,
     }),
   );
 };

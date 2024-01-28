@@ -18,6 +18,8 @@ const useWebSocket = (url: string) => {
 
       const data = JSON.parse(event.data);
 
+      console.log("type", data?.type);
+
       if (data?.type === "allMessage") {
         setMessageGroup(data.data);
         return;

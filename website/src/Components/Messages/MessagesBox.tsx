@@ -1,7 +1,6 @@
 import {
   ChangeEvent,
   FC,
-  KeyboardEventHandler,
   KeyboardEvent,
   SyntheticEvent,
   useCallback,
@@ -28,16 +27,15 @@ import {
   Person as PersonIcon,
   Send as SendIcon,
 } from "@mui/icons-material";
-import { UserOpenInfo } from "../../types/commonTypes";
-import useWebSocket from "../../hook/useWebSocket";
-import { webSocketRoot } from "../../apiConifg";
+import { MessageGroup, UserOpenInfo } from "../../types/commonTypes";
 import { groupPublic } from "../../Utility/contants";
 
 const MessagesBox: FC<{
   currentUserInfo: UserOpenInfo;
   currentGroup: string;
-}> = ({ currentUserInfo, currentGroup }) => {
-  const { sendMessage, messageGroup } = useWebSocket(webSocketRoot);
+  sendMessage: (message: string) => void;
+  messageGroup: MessageGroup;
+}> = ({ currentUserInfo, currentGroup, sendMessage, messageGroup }) => {
   const [textValue, setTextValue] = useState("");
   const [message, setMessage] = useState("");
   const [isBroadcastOpen, setIsBroadcastOpen] = useState(false);
@@ -172,7 +170,6 @@ const MessagesBox: FC<{
     event: Event | SyntheticEvent,
     reason: SnackbarCloseReason,
   ) => {
-    console.log("reason", reason);
     if (reason === "clickaway") return;
     setIsBroadcastOpen(false);
   };
@@ -188,7 +185,7 @@ const MessagesBox: FC<{
         <Box
           ref={boxRef}
           sx={{
-            height: "calc( 100% - 90px - 16px - 32px)",
+            height: "calc( 100vh - 90px - 16px - 32px)",
             overflowY: "auto",
             p: 2,
             pb: 4,

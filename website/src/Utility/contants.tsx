@@ -8,3 +8,4 @@ export const groupList = [
   "Room 4",
   groupSilence,
 ];
+export const sidebarTabList = ["Messages", "Wish"];

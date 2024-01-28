@@ -61,6 +61,19 @@ class UserController {
     }
   }
 
+  async logout(req: Request, res: Response) {
+    console.log("logout", res.locals.username);
+
+    try {
+      res.json({});
+    } catch (error) {
+      console.error("Error in login:", error);
+      res
+        .status(500)
+        .json({ success: false, message: "Internal server error" });
+    }
+  }
+
   async users(req: Request, res: Response) {
     try {
       const users = await UserModel.find({}).select({ username: 1, _id: 0 });

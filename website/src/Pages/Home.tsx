@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import Sidebar from "../Components/Sidebar/Sidebar";
 import SidebarList from "../Components/Sidebar/SidebarList";
 import { Box } from "@mui/material";
@@ -9,10 +9,20 @@ import _ from "lodash";
 import { useUsers } from "../Components/ProtectedLayout";
 import { useUserOpenInfo } from "../hook/useUserOpenInfo";
 import { groupList, groupSilence } from "../Utility/contants";
+import TabPanel from "../Components/Tab/TabPanel";
+import WishBoard from "../Components/Boxes/WishBoard";
+import SidebarTab from "../Components/Sidebar/SibebarTab";
+import useWebSocket from "../hook/useWebSocket";
+import { webSocketRoot } from "../apiConifg";
 
 const Home = () => {
   const { users } = useUsers();
   const { userOpenInfo } = useUserOpenInfo();
+
+  const { sendMessage, messageGroup, loginUserList, wishList } = useWebSocket(
+    webSocketRoot,
+    userOpenInfo.name,
+  );
 
   const [isMembersOpen, setIsMembersOpen] = useState(false);
   const [isMessageOpen, setIsMessageOpen] = useState(true);
@@ -24,6 +34,7 @@ const Home = () => {
     })),
   );
   const [findUser, setFindUser] = useState<string>();
+  const [tabIndex, setTabIndex] = useState(0);
 
   const currentGroup = useMemo(() => {
     const userInfo = _.find(
@@ -48,6 +59,10 @@ const Home = () => {
     });
 
     setUserGroup(newUserGroup);
+  };
+
+  const handleTab = (tabIndex: number) => {
+    setTabIndex(tabIndex);
   };
 
   return (
@@ -80,17 +95,20 @@ const Home = () => {
             currentUserInfo={userOpenInfo}
           />
         </Box>
-        <Sidebar
+        <SidebarTab
           anchor="right"
           isOpen={isMessageOpen}
           hidden={currentGroup === groupSilence ? true : false}
           onClick={() => setIsMessageOpen(!isMessageOpen)}
-        >
-          <MessagesBox
-            currentUserInfo={userOpenInfo}
-            currentGroup={currentGroup}
-          />
-        </Sidebar>
+          tabIndex={tabIndex}
+          onChange={handleTab}
+          userOpenInfo={userOpenInfo}
+          currentGroup={currentGroup}
+          sendMessage={sendMessage}
+          messageGroup={messageGroup}
+          loginUserList={loginUserList}
+          wishList={wishList}
+        />
       </div>
     </>
   );

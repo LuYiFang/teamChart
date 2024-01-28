@@ -8,7 +8,7 @@ import {
   USERS_URL,
 } from "../../src/utils/constants";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import UserModel from "../../src/controllers/userModel";
+import UserModel from "../../src/models/userModel";
 import { connect, disconnect } from "../../src/utils/db";
 
 const API_TYPE = "User";

@@ -1,4 +1,5 @@
 import { AxiosRequestConfig } from "axios";
+import { PropsWithChildren } from "react";
 
 export type User = {
   id: string;
@@ -34,7 +35,7 @@ export interface Message {
   username: string;
   message: string;
   groupId: string;
-  createTime: Date;
+  createAt: Date;
 }
 
 export interface MessageGroup {
@@ -42,3 +43,40 @@ export interface MessageGroup {
 }
 
 export type LocalStorageValue = string | UserOpenInfo | null;
+
+export interface VerticalTabsComponentProps extends PropsWithChildren {
+  tabIndex?: number;
+  onChange?: (tabIndex: number) => void;
+}
+
+export interface SidbarComponentProps extends PropsWithChildren {
+  anchor?: "bottom" | "left" | "right" | "top" | undefined;
+  isOpen: boolean;
+  hidden?: boolean;
+  onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+}
+
+export interface SidbarTabComponentProps
+  extends SidbarComponentProps,
+    VerticalTabsComponentProps {
+  userOpenInfo: UserOpenInfo;
+  currentGroup: string;
+  sendMessage: (message: string) => void;
+  messageGroup: MessageGroup;
+  loginUserList: Array<string>;
+  wishList: Array<Wish>;
+}
+
+export interface Wish {
+  username: string;
+  content: string;
+  voteCount: number;
+  createAt: Date;
+}
+
+export type WishCardProps = React.PropsWithChildren<{
+  currentUser: string;
+  voteCount: number;
+  name: string;
+  content: string;
+}>;
