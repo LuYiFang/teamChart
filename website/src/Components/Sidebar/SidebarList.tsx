@@ -65,7 +65,7 @@ const SidebarList: FC<{
           OnlineStatus.Online,
         )}
         <Divider />
-        <List sx={{ overflowY: "auto" }}>
+        <List sx={{ overflowY: "auto", overflowX: "hidden" }}>
           {_.map(otherUserList, (user, index) =>
             generatePerson(user.name, index, user.status),
           )}

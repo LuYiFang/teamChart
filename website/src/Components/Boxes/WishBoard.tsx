@@ -6,12 +6,15 @@ import {
   Card,
   CardContent,
   CardHeader,
+  Fab,
   IconButton,
   Stack,
   styled,
+  TextField,
 } from "@mui/material";
-import React, { FC, useEffect } from "react";
+import React, { FC, FormEvent, useEffect, useState } from "react";
 import PersonIcon from "@mui/icons-material/Person";
+import AddIcon from "@mui/icons-material/Add";
 import PlusOneIcon from "@mui/icons-material/PlusOne";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import _ from "lodash";
@@ -22,6 +25,7 @@ import {
   WishCardProps,
 } from "../../types/commonTypes";
 import RippleAvatar from "../Avatars/RippleAvatar";
+import FormDialog from "../Dialogs/FormDialog";
 
 const StyledBadge = styled(Badge)<BadgeProps>(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -81,23 +85,81 @@ const WishBoard: FC<{
   wishList: Array<Wish>;
   currentUserInfo: UserOpenInfo;
   userMap: UserMap;
-}> = ({ wishList, currentUserInfo, userMap }) => {
+  sendMessage: (message: string) => void;
+}> = ({ wishList, currentUserInfo, userMap, sendMessage }) => {
+  const [isCreateWishOpen, setIsCreateWishOpen] = useState(false);
+
+  const openCreateWish = () => {
+    setIsCreateWishOpen(true);
+  };
+
+  const closeCreateWish = () => {
+    setIsCreateWishOpen(false);
+  };
+
+  const saveWish = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const data = new FormData(event.currentTarget);
+    sendMessage(
+      JSON.stringify({
+        type: "newWish",
+        content: data.get("wishContent"),
+        username: currentUserInfo.name,
+      }),
+    );
+  };
+
   return (
     <>
-      <Stack spacing={2} p={3}>
-        {_.map(wishList, (item, i) => {
-          return (
-            <WishCard
-              key={`wish-card-${i}`}
-              currentUser={currentUserInfo.name}
-              name={item.username}
-              content={item.content}
-              voteCount={item.voteCount}
-              userMap={userMap}
+      <Box sx={{ height: "100vh" }}>
+        <Box
+          sx={{
+            height: "calc( 100vh - 64px - 48px)",
+          }}
+        >
+          <Stack spacing={2} p={3}>
+            {_.map(wishList, (item, i) => {
+              return (
+                <WishCard
+                  key={`wish-card-${i}`}
+                  currentUser={currentUserInfo.name}
+                  name={item.username}
+                  content={item.content}
+                  voteCount={item.voteCount}
+                  userMap={userMap}
+                />
+              );
+            })}
+          </Stack>
+        </Box>
+        <Box sx={{ height: 64, p: 1, display: "flex", justifyContent: "end" }}>
+          <Fab color="secondary" size="medium" onClick={openCreateWish}>
+            <AddIcon
+              sx={{
+                "&": {
+                  color: "white",
+                },
+              }}
             />
-          );
-        })}
-      </Stack>
+          </Fab>
+        </Box>
+      </Box>
+      <FormDialog
+        title="Create Wish"
+        open={isCreateWishOpen}
+        onClose={closeCreateWish}
+        onSubmit={saveWish}
+      >
+        <TextField
+          fullWidth
+          multiline
+          rows={5}
+          autoFocus
+          required
+          name="wishContent"
+        />
+      </FormDialog>
     </>
   );
 };

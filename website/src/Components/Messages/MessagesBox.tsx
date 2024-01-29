@@ -30,6 +30,7 @@ import { MessageGroup, UserMap, UserOpenInfo } from "../../types/commonTypes";
 import { groupPublic } from "../../Utility/contants";
 import _ from "lodash";
 import RippleAvatar from "../Avatars/RippleAvatar";
+import moment from "moment";
 
 const MessagesBox: FC<{
   currentUserInfo: UserOpenInfo;
@@ -63,26 +64,30 @@ const MessagesBox: FC<{
   const generateMessage = (
     name: string,
     message: string,
+    createdAt: Date,
     preName: string | undefined,
     index: number,
   ): React.ReactElement => {
+    const isCurrentUser = currentUserInfo.name === name;
+    const isConsecutive = preName === name;
+
+    console.log(message, isConsecutive);
+
     return (
       <Stack
         key={`message-${index}`}
         spacing={1}
         sx={{
           mx: 2,
-          alignItems: currentUserInfo.name === name ? "flex-end" : "flex-start",
+          mt: isConsecutive ? 1.5 : 2,
+          alignItems: isCurrentUser ? "flex-end" : "flex-start",
         }}
       >
         <Stack
           direction="row"
           spacing={1}
           sx={{
-            display:
-              preName === name || name === currentUserInfo.name
-                ? "none"
-                : "flex",
+            display: isConsecutive || isCurrentUser ? "none" : "flex",
             alignItems: "center",
             pt: 2,
           }}
@@ -102,11 +107,22 @@ const MessagesBox: FC<{
             maxWidth: "100%",
             p: 1,
             backgroundColor: (theme) =>
-              currentUserInfo.name === name
+              isCurrentUser
                 ? theme.palette.secondary.light
                 : theme.palette.primary.light,
+            position: "relative",
           }}
         >
+          <Typography
+            variant="body2"
+            sx={{
+              position: "absolute",
+              [isCurrentUser ? "left" : "right"]: 0,
+              bottom: -20,
+            }}
+          >
+            {moment(createdAt).format("kk:mm")}
+          </Typography>
           <Typography
             sx={{
               width: "fit-content",
@@ -189,18 +205,38 @@ const MessagesBox: FC<{
         }}
       >
         <Box
+          sx={{
+            borderWidth: 0,
+            borderBottomWidth: 1,
+            borderStyle: "solid",
+            borderColor: (theme) => theme.palette.primary.light,
+            height: 60,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Typography variant="h5">{currentGroup}</Typography>
+        </Box>
+
+        <Box
           ref={boxRef}
           sx={{
-            height: "calc( 100vh - 90px - 16px - 32px)",
+            height: "calc( 100vh - 90px - 16px - 32px - 60px)",
             overflowY: "auto",
             p: 2,
             pb: 4,
           }}
         >
-          <Typography variant="h5">{currentGroup}</Typography>
           {currentGroupMessages.map((item: any, index) => {
             const preName = (currentGroupMessages[index - 1] || {}).username;
-            return generateMessage(item.username, item.message, preName, index);
+            return generateMessage(
+              item.username,
+              item.message,
+              item.createdAt,
+              preName,
+              index,
+            );
           })}
         </Box>
         <Box

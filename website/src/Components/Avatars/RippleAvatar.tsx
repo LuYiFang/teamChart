@@ -1,5 +1,5 @@
 import { Avatar, Badge, styled } from "@mui/material";
-import { FC, ReactNode } from "react";
+import { FC, forwardRef, ReactNode } from "react";
 import { OnlineStatus, RippleAvatarProps } from "../../types/commonTypes";
 import _ from "lodash";
 
@@ -40,8 +40,8 @@ const RippleStyledAvatar = styled(Avatar)<RippleAvatarProps>(({
     ...(active && {
       "&::after": {
         position: "absolute",
-        top: -2,
-        left: -2,
+        top: 0,
+        left: 0,
         width: "100%",
         height: "100%",
         borderRadius: "50%",
@@ -63,23 +63,23 @@ const RippleStyledAvatar = styled(Avatar)<RippleAvatarProps>(({
   };
 });
 
-const RippleAvatar: FC<{ children: ReactNode } & RippleAvatarProps> = ({
-  children,
-  active,
-  iscurrentuser,
-  status,
-}) => {
+const RippleAvatar = forwardRef<
+  HTMLElement,
+  { children: ReactNode } & RippleAvatarProps
+>(({ children, active, iscurrentuser, status, ...rest }, ref) => {
   return (
     <StyledBadge
+      ref={ref}
       overlap="circular"
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       variant="dot"
       status={status}
+      {...rest}
     >
       <RippleStyledAvatar active={active} iscurrentuser={iscurrentuser}>
         {typeof children === "string" ? _.slice(children, 0, 2) : children}
       </RippleStyledAvatar>
     </StyledBadge>
   );
-};
+});
 export default RippleAvatar;

@@ -11,7 +11,7 @@ interface Wish extends Document {
   content: string;
   voteCount: number;
   status: WishStatus;
-  createAt: Date;
+  createdAt: Date;
 }
 
 const WishSchema = new Schema(

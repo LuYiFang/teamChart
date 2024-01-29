@@ -49,7 +49,7 @@ export const setupWebsocket = (wss: WebSocketServer) => {
               type: "loginEvent",
               username: username,
             },
-            false,
+            true,
           );
           return;
         }
@@ -72,14 +72,18 @@ export const setupWebsocket = (wss: WebSocketServer) => {
         }
 
         if (data.type === "newWish") {
+          const newWish = await chartController.saveOpenWishBoard(
+            data.username,
+            data.content,
+          );
+
           broadcastToAll(wss, ws, {
             type: "newWish",
-            content: data.content,
-            username: data.username,
+            content: newWish.content,
+            username: newWish.username,
+            voteCount: newWish.voteCount,
+            createdAt: newWish.createdAt,
           });
-
-          chartController.saveOpenWishBoard(data.username, data.content);
-
           return;
         }
 
@@ -125,7 +129,8 @@ const broadcastToAll = (
 ) => {
   wss.clients.forEach((client) => {
     let cond = true;
-    if (includeSelf) cond = client !== sender;
+    if (!includeSelf) cond = client !== sender;
+
     if (cond && client.readyState === WebSocket.OPEN) {
       client.send(JSON.stringify(data));
     }

@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from "axios";
-import { PropsWithChildren } from "react";
+import { FormEvent, PropsWithChildren, ReactNode } from "react";
 
 export type User = {
   id: string;
@@ -36,7 +36,7 @@ export interface Message {
   username: string;
   message: string;
   groupId: string;
-  createAt: Date;
+  createdAt: Date;
 }
 
 export interface MessageGroup {
@@ -72,7 +72,7 @@ export interface Wish {
   username: string;
   content: string;
   voteCount: number;
-  createAt: Date;
+  createdAt: Date;
 }
 
 export type WishCardProps = React.PropsWithChildren<{
@@ -97,3 +97,11 @@ export type RippleAvatarProps = {
 export type UserMap = {
   [name: string]: User;
 };
+
+export interface FormDialogProps {
+  open: boolean;
+  onClose: () => void;
+  title?: string;
+  children: ReactNode;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+}

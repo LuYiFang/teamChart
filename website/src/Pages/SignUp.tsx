@@ -16,8 +16,10 @@ import { api } from "../apiConifg";
 import { FetchApi } from "../Utility/fetchApi";
 import { Alert } from "../Utility/alert";
 import { LoadingButton } from "@mui/lab";
+import { useUserOpenInfo } from "../hook/useUserOpenInfo";
 
 const SignUp = () => {
+  const { setUserOpenInfo } = useUserOpenInfo();
   const { login } = useAuth();
   const [formError, setFormError] = useState({
     username: "",
@@ -77,6 +79,7 @@ const SignUp = () => {
     setIsloading(false);
 
     if (res?.token) {
+      setUserOpenInfo({ name: username });
       login(res?.token);
       return;
     }

@@ -38,6 +38,7 @@ const SidebarTab: FC<SidbarTabComponentProps> = (props) => {
       wishList={wishList}
       currentUserInfo={userOpenInfo}
       userMap={userMap}
+      sendMessage={sendMessage}
     />,
   ];
 

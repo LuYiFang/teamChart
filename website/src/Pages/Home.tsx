@@ -95,7 +95,7 @@ const Home = () => {
           sx={{
             flexGrow: 1,
             p: 4,
-            height: "calc(100vh - 80px)",
+            height: "100vh",
             zIndex: (theme) => theme.zIndex.drawer - 2,
           }}
         >

@@ -1,6 +1,6 @@
 import React from "react";
 import { styled } from "@mui/material/styles";
-import { Avatar, Badge, Box, Theme } from "@mui/material";
+import { Avatar, Badge, Box, Theme, Tooltip } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import {
   DragDropContext,
@@ -40,8 +40,14 @@ const Person: React.FC<PersonProps> = ({
   currentUserInfo,
   status,
 }) => {
+  const iscurrentuser = user.name === currentUserInfo.name;
+
   return (
-    <Draggable draggableId={user.id} index={index}>
+    <Draggable
+      draggableId={user.id}
+      index={index}
+      isDragDisabled={!iscurrentuser}
+    >
       {(provided) => {
         return (
           <div
@@ -50,13 +56,15 @@ const Person: React.FC<PersonProps> = ({
             {...provided.dragHandleProps}
             style={{ maxHeight: 46, ...provided.draggableProps.style }}
           >
-            <RippleAvatar
-              status={status}
-              active={findUser === user.name ? "true" : undefined}
-              iscurrentuser={(user.name === currentUserInfo.name).toString()}
-            >
-              {user.name}
-            </RippleAvatar>
+            <Tooltip title={user.name}>
+              <RippleAvatar
+                status={status}
+                active={findUser === user.name ? "true" : undefined}
+                iscurrentuser={iscurrentuser.toString()}
+              >
+                {user.name}
+              </RippleAvatar>
+            </Tooltip>
           </div>
         );
       }}
@@ -80,23 +88,28 @@ const Groups: React.FC<MessageProps> = ({
             style={{
               width: "100%",
               height: "100%",
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "flex-start",
             }}
           >
-            {users.map((user, index) => {
-              return (
-                <Person
-                  key={`person-${user.name}`}
-                  findUser={findUser}
-                  currentUserInfo={currentUserInfo}
-                  user={user}
-                  index={index}
-                  status={user.status}
-                />
-              );
-            })}
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "flex-start",
+              }}
+            >
+              {users.map((user, index) => {
+                return (
+                  <Person
+                    key={`person-${user.name}`}
+                    findUser={findUser}
+                    currentUserInfo={currentUserInfo}
+                    user={user}
+                    index={index}
+                    status={user.status}
+                  />
+                );
+              })}
+            </div>
 
             {provided.placeholder}
           </div>

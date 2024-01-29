@@ -31,7 +31,8 @@ const GroupArea: FC<{
                     borderColor: (theme: Theme) => theme.palette.primary.dark,
                     borderStyle: "solid",
                     borderRadius: "3%",
-                    height: "calc(100% - 32px)",
+                    height: "calc(100vh / 2 - 64px - 16px)",
+                    overflowY: "auto",
                   }}
                 >
                   <Groups

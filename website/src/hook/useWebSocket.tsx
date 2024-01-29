@@ -29,6 +29,8 @@ const useWebSocket = (url: string, username: string) => {
 
       const data = JSON.parse(event.data);
 
+      console.log("data", data);
+
       if (data?.type === "allMessage") {
         setMessageGroup(data.data);
         return;
@@ -44,6 +46,20 @@ const useWebSocket = (url: string, username: string) => {
           return _.mapValues(preMessageGroup, (group) => {
             return group.concat([data]);
           });
+        });
+        return;
+      }
+
+      if (data?.type === "newWish") {
+        setWishList((pre) => {
+          return pre.concat([
+            {
+              content: data.content,
+              username: data.username,
+              voteCount: data.voteCount,
+              createdAt: data.createdAt,
+            },
+          ]);
         });
         return;
       }
