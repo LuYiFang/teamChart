@@ -23,9 +23,13 @@ class UserController {
         return;
       }
 
-      const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
-        expiresIn: "1h",
-      });
+      const token = jwt.sign(
+        { userId: user.id, username: username },
+        SECRET_KEY,
+        {
+          expiresIn: "1h",
+        },
+      );
       res.json({ token });
     } catch (error) {
       console.error("Error in login:", error);
