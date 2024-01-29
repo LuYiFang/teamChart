@@ -19,6 +19,7 @@ import PlusOneIcon from "@mui/icons-material/PlusOne";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import _ from "lodash";
 import {
+  SendMessage,
   UserMap,
   UserOpenInfo,
   Wish,
@@ -42,6 +43,7 @@ const WishCard: FC<WishCardProps> = ({
   name,
   content,
   userMap,
+  handleVote,
 }) => {
   return (
     <>
@@ -58,7 +60,7 @@ const WishCard: FC<WishCardProps> = ({
           title={name}
           action={
             <Stack direction="row">
-              <IconButton sx={{ marginRight: 2 }}>
+              <IconButton sx={{ marginRight: 2 }} onClick={handleVote}>
                 <StyledBadge
                   color="secondary"
                   badgeContent={voteCount}
@@ -85,7 +87,7 @@ const WishBoard: FC<{
   wishList: Array<Wish>;
   currentUserInfo: UserOpenInfo;
   userMap: UserMap;
-  sendMessage: (message: string) => void;
+  sendMessage: SendMessage;
 }> = ({ wishList, currentUserInfo, userMap, sendMessage }) => {
   const [isCreateWishOpen, setIsCreateWishOpen] = useState(false);
 
@@ -110,6 +112,16 @@ const WishBoard: FC<{
     );
   };
 
+  const handleVote = (widhId: string) => {
+    sendMessage(
+      JSON.stringify({
+        type: "voteWish",
+        wishId: widhId,
+        username: currentUserInfo.name,
+      }),
+    );
+  };
+
   return (
     <>
       <Box sx={{ height: "100vh" }}>
@@ -128,6 +140,7 @@ const WishBoard: FC<{
                   content={item.content}
                   voteCount={item.voteCount}
                   userMap={userMap}
+                  handleVote={() => handleVote(item._id)}
                 />
               );
             })}

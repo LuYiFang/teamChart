@@ -5,6 +5,7 @@ import { SECRET_KEY, saltRounds } from "../utils/constants";
 import UserModel from "../models/userModel";
 import MessageModel from "../models/messageModel";
 import WishModel, { WishVoteModel } from "../models/wishModel";
+import mongoose from "mongoose";
 
 class ChartController {
   async getAllMessageHistory() {
@@ -25,11 +26,37 @@ class ChartController {
   }
 
   async getOpenWishBoard() {
-    const wishList = await WishModel.find({ status: "open" })
-      .sort({ createdAt: 1 })
-      .select({ username: 1, content: 1, voteCount: 1, createdAt: 1 });
+    const wishListWithVote = await WishModel.aggregate([
+      {
+        $match: { status: "open" },
+      },
+      {
+        $lookup: {
+          from: "wishvotes",
+          localField: "_id",
+          foreignField: "wishId",
+          as: "wishVotes",
+        },
+      },
+      {
+        $addFields: {
+          voteCount: { $size: "$wishVotes" },
+        },
+      },
+      {
+        $sort: { createdAt: 1 },
+      },
+      {
+        $project: {
+          username: 1,
+          content: 1,
+          voteCount: 1,
+          createdAt: 1,
+        },
+      },
+    ]);
 
-    return wishList;
+    return wishListWithVote;
   }
 
   async saveOpenWishBoard(username: string, content: string) {
@@ -39,9 +66,30 @@ class ChartController {
     }).save();
   }
 
+  async countVote(wishId: string) {
+    const voteCount = await WishVoteModel.aggregate([
+      {
+        $match: { wishId: new mongoose.Types.ObjectId(wishId) },
+      },
+      {
+        $group: {
+          _id: null,
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          count: 1,
+        },
+      },
+    ]);
+    return voteCount.length > 0 ? voteCount[0].count : 0;
+  }
+
   async voteWish(wishId: string, username: string) {
     await new WishVoteModel({
-      wishId: wishId,
+      wishId: new mongoose.Types.ObjectId(wishId),
       username: username,
     }).save();
   }

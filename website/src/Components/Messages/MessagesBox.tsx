@@ -26,7 +26,12 @@ import {
   Person as PersonIcon,
   Send as SendIcon,
 } from "@mui/icons-material";
-import { MessageGroup, UserMap, UserOpenInfo } from "../../types/commonTypes";
+import {
+  MessageGroup,
+  SendMessage,
+  UserMap,
+  UserOpenInfo,
+} from "../../types/commonTypes";
 import { groupPublic } from "../../Utility/contants";
 import _ from "lodash";
 import RippleAvatar from "../Avatars/RippleAvatar";
@@ -35,7 +40,7 @@ import moment from "moment";
 const MessagesBox: FC<{
   currentUserInfo: UserOpenInfo;
   currentGroup: string;
-  sendMessage: (message: string) => void;
+  sendMessage: SendMessage;
   messageGroup: MessageGroup;
   userMap: UserMap;
 }> = ({

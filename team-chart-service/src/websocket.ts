@@ -79,22 +79,25 @@ export const setupWebsocket = (wss: WebSocketServer) => {
 
           broadcastToAll(wss, ws, {
             type: "newWish",
+            _id: newWish._id,
             content: newWish.content,
             username: newWish.username,
-            voteCount: newWish.voteCount,
+            voteCount: 0,
             createdAt: newWish.createdAt,
           });
           return;
         }
 
         if (data.type === "voteWish") {
+          await chartController.voteWish(data.wishId, data.username);
+          const newCount = await chartController.countVote(data.wishId);
+
           broadcastToAll(wss, ws, {
             type: "voteWish",
             wishId: data.wishId,
-            username: data.username,
+            newCount: newCount,
           });
 
-          chartController.voteWish(data.username, data.wishId);
           return;
         }
 
@@ -109,7 +112,7 @@ export const setupWebsocket = (wss: WebSocketServer) => {
         ws.send(
           JSON.stringify({
             type: "messageError",
-            reason: `${error}`,
+            error: `${error}`,
           }),
         );
       }

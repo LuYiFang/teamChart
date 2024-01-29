@@ -62,7 +62,7 @@ export interface SidbarTabComponentProps
     VerticalTabsComponentProps {
   userOpenInfo: UserOpenInfo;
   currentGroup: string;
-  sendMessage: (message: string) => void;
+  sendMessage: SendMessage;
   messageGroup: MessageGroup;
   userGroup: Array<User>;
   wishList: Array<Wish>;
@@ -73,6 +73,7 @@ export interface Wish {
   content: string;
   voteCount: number;
   createdAt: Date;
+  _id: string;
 }
 
 export type WishCardProps = React.PropsWithChildren<{
@@ -81,6 +82,7 @@ export type WishCardProps = React.PropsWithChildren<{
   name: string;
   content: string;
   userMap: UserMap;
+  handleVote: () => void;
 }>;
 
 export enum OnlineStatus {
@@ -105,3 +107,5 @@ export interface FormDialogProps {
   children: ReactNode;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }
+
+export type SendMessage = (message: string) => void;

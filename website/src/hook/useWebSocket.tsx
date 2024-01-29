@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { MessageGroup, Wish } from "../types/commonTypes";
 import _ from "lodash";
 import { getStorage } from "../Utility/utility";
+import { Alert } from "../Utility/alert";
 
 const useWebSocket = (url: string, username: string) => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
@@ -29,8 +30,6 @@ const useWebSocket = (url: string, username: string) => {
 
       const data = JSON.parse(event.data);
 
-      console.log("data", data);
-
       if (data?.type === "allMessage") {
         setMessageGroup(data.data);
         return;
@@ -54,12 +53,26 @@ const useWebSocket = (url: string, username: string) => {
         setWishList((pre) => {
           return pre.concat([
             {
+              _id: data._id,
               content: data.content,
               username: data.username,
               voteCount: data.voteCount,
               createdAt: data.createdAt,
             },
           ]);
+        });
+        return;
+      }
+
+      if (data?.type === "voteWish") {
+        setWishList((pre) => {
+          return _.map(pre, (wish) => {
+            if (wish._id !== data.wishId) return wish;
+            return {
+              ...wish,
+              voteCount: data.newCount,
+            };
+          });
         });
         return;
       }
@@ -83,6 +96,10 @@ const useWebSocket = (url: string, username: string) => {
       if (data?.type === "logoutEvent") {
         console.log("logoutEvent", data);
         _handleLogoutEvent(data.username);
+      }
+
+      if (data?.type === "messageError") {
+        Alert.error(data.error);
       }
     };
 

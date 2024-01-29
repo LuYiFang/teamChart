@@ -9,7 +9,6 @@ interface Wish extends Document {
   id: mongoose.Types.ObjectId;
   username: string;
   content: string;
-  voteCount: number;
   status: WishStatus;
   createdAt: Date;
 }
@@ -18,7 +17,6 @@ const WishSchema = new Schema(
   {
     username: { type: String, required: true },
     content: { type: String, required: true },
-    voteCount: { type: Number, default: 0, required: true },
     status: {
       type: String,
       enum: Object.values(WishStatus),
@@ -49,6 +47,22 @@ const WishVoteSchema = new Schema(
     timestamps: true,
   },
 );
+
+WishVoteSchema.pre("save", async function (next) {
+  const wishVote = this;
+
+  const existingVote = await WishVoteModel.findOne({
+    wishId: wishVote.wishId,
+    username: wishVote.username,
+  });
+
+  if (existingVote) {
+    const error = new Error("Duplicate wishId and username combination");
+    return next(error);
+  }
+
+  next();
+});
 
 export const WishVoteModel = mongoose.model<WishVote>(
   "wishVote",
