@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
-import { Alert } from "./alert";
+import { Alert } from "../Components/Alerts/alert";
 import { FetchApiType } from "../types/commonTypes";
 
 export class FetchApi {

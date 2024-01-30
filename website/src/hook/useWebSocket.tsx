@@ -98,6 +98,7 @@ const useWebSocket = (url: string, username: string) => {
         _handleLogoutEvent(data.username);
       }
 
+        Alert.chainOfCalls(data.message, `${data.username} call`);
       if (data?.type === "messageError") {
         Alert.error(data.error);
       }

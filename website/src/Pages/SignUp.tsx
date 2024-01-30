@@ -14,7 +14,7 @@ import { FormEvent, useState } from "react";
 import { useAuth } from "../hook/useAuth";
 import { api } from "../apiConifg";
 import { FetchApi } from "../Utility/fetchApi";
-import { Alert } from "../Utility/alert";
+import { Alert } from "../Components/Alerts/alert";
 import { LoadingButton } from "@mui/lab";
 import { useUserOpenInfo } from "../hook/useUserOpenInfo";
 

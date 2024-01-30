@@ -88,6 +88,7 @@ const Home = () => {
           userGroup={userGroup}
           currentUserInfo={userOpenInfo}
           onClick={() => setIsMembersOpen(!isMembersOpen)}
+          sendMessage={sendMessage}
         />
 
         <Box

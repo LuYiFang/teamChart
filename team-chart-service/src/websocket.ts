@@ -108,6 +108,15 @@ export const setupWebsocket = (wss: WebSocketServer) => {
           });
           return;
         }
+
+        if (data.type === "call") {
+          broadcastTo(data.targetUser, {
+            type: "call",
+            username: data.username,
+            message: data.message,
+          });
+          return;
+        }
       } catch (error) {
         ws.send(
           JSON.stringify({

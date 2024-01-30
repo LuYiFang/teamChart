@@ -10,7 +10,7 @@ import { useAuth } from "../hook/useAuth";
 import { root } from "../Utility/routePath";
 import { Suspense, useEffect } from "react";
 import { Box, CircularProgress, Typography } from "@mui/material";
-import { Alert } from "../Utility/alert";
+import { Alert } from "./Alerts/alert";
 
 type ContextType = { users: Array<string> };
 

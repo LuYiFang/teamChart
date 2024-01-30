@@ -16,8 +16,10 @@ import { FetchApi } from "./Utility/fetchApi";
 import { api } from "./apiConifg";
 import SignUp from "./Pages/SignUp";
 import { getStorage } from "./Utility/utility";
+import _ from "lodash";
+import { User } from "./types/commonTypes";
 
-const getUsers = async (): Promise<Array<string>> => {
+const getUsers = async (): Promise<Record<string, any>> => {
   const user = getStorage("user", "");
   if (!user) {
     return [];

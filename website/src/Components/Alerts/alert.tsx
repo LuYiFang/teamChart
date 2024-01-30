@@ -1,5 +1,6 @@
 import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
+import withReactContent, { ReactSweetAlertOptions } from "sweetalert2-react-content";
+import "./style.css";
 
 export class Alert {
   static swal = withReactContent(Swal);
@@ -30,4 +31,3 @@ export class Alert {
       confirmButtonText: "OK",
     });
   }
-}

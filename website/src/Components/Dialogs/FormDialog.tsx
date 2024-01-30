@@ -33,7 +33,9 @@ const FormDialog: FC<FormDialogProps> = ({
         <DialogContent sx={{ width: 900 }}>{children}</DialogContent>
         <DialogActions>
           <Button onClick={onClose}>Cancel</Button>
-          <Button type="submit">Save</Button>
+          <Button color="secondary" type="submit">
+            Send
+          </Button>
         </DialogActions>
       </Dialog>
     </>
