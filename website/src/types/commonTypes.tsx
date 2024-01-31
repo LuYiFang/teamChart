@@ -109,3 +109,8 @@ export interface FormDialogProps {
 }
 
 export type SendMessage = (message: string) => void;
+
+export interface VoteWish {
+  wishId: string;
+  newCount: number;
+}

@@ -109,6 +109,14 @@ export const setupWebsocket = (wss: WebSocketServer) => {
           return;
         }
 
+        if (data.type === "logoutEvent") {
+          broadcastToAll(wss, ws, {
+            type: "logoutEvent",
+            username: data.username,
+          }, false);
+          return;
+        }
+
         if (data.type === "call") {
           broadcastTo(data.targetUser, {
             type: "call",
@@ -120,7 +128,7 @@ export const setupWebsocket = (wss: WebSocketServer) => {
       } catch (error) {
         ws.send(
           JSON.stringify({
-            type: "messageError",
+            type: "errorMessage",
             error: `${error}`,
           }),
         );

@@ -159,6 +159,12 @@ const SidebarList: FC<{
 
   const handleLogout = () => {
     setUserOpenInfo({ name: "" });
+    sendMessage(
+      JSON.stringify({
+        type: "logoutEvent",
+        username: currentUserInfo.name,
+      }),
+    );
     logout();
   };
 

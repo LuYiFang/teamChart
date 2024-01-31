@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { MessageGroup, Wish } from "../types/commonTypes";
+import { Message, MessageGroup, VoteWish, Wish } from "../types/commonTypes";
 import _ from "lodash";
 import { getStorage } from "../Utility/utility";
-import { Alert } from "../Utility/alert";
+import { Alert } from "../Components/Alerts/alert";
 
 const useWebSocket = (url: string, username: string) => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
@@ -30,77 +30,42 @@ const useWebSocket = (url: string, username: string) => {
 
       const data = JSON.parse(event.data);
 
-      if (data?.type === "allMessage") {
-        setMessageGroup(data.data);
-        return;
-      }
+      switch (data?.type) {
+        case "allMessage":
+          handleAllMessage(data);
+          break;
+        case "newMessage":
+          handleNewMessage(data);
+          break;
 
-      if (data?.type === "openWish") {
-        setWishList((pre) => data.data);
-        return;
-      }
+        case "openWish":
+          handleOpenWish(data);
+          break;
+        case "newWish":
+          handleNewWish(data);
+          break;
+        case "voteWish":
+          handleVoteWish(data);
+          break;
 
-      if (data?.type === "newMessage") {
-        setMessageGroup((preMessageGroup) => {
-          return _.mapValues(preMessageGroup, (group) => {
-            return group.concat([data]);
-          });
-        });
-        return;
-      }
+        case "loginEvent":
+          handleLoginEvent(ws, data);
+          break;
+        case "logingReturnEvent":
+          handleLoginReturnEvent(data);
+          break;
 
-      if (data?.type === "newWish") {
-        setWishList((pre) => {
-          return pre.concat([
-            {
-              _id: data._id,
-              content: data.content,
-              username: data.username,
-              voteCount: data.voteCount,
-              createdAt: data.createdAt,
-            },
-          ]);
-        });
-        return;
-      }
+        case "logoutEvent":
+          handlelogoutEvent(data);
+          break;
 
-      if (data?.type === "voteWish") {
-        setWishList((pre) => {
-          return _.map(pre, (wish) => {
-            if (wish._id !== data.wishId) return wish;
-            return {
-              ...wish,
-              voteCount: data.newCount,
-            };
-          });
-        });
-        return;
-      }
+        case "call":
+          handleCall(data);
+          break;
 
-      if (data?.type === "loginEvent") {
-        _handleLoginEvent(data.username);
-
-        ws.send(
-          JSON.stringify({
-            type: "logingReturnEvent",
-            username: username,
-            targetUser: data.username,
-          }),
-        );
-      }
-
-      if (data?.type === "logingReturnEvent") {
-        _handleLoginEvent(data.username);
-      }
-
-      if (data?.type === "logoutEvent") {
-        console.log("logoutEvent", data);
-        _handleLogoutEvent(data.username);
-      }
-
-        Alert.chainOfCalls(data.message, `${data.username} call`);
-      if (data?.type === "messageError") {
-        Alert.error(data.error);
+        case "errorMessage":
+          handleErrorMessage(data);
+          break;
       }
     };
 
@@ -116,14 +81,91 @@ const useWebSocket = (url: string, username: string) => {
     };
   }, [url]);
 
-  const _handleLoginEvent = (username: string) => {
-    setLoginUserList((preLoginUserList) =>
-      _.compact(_.uniq([...preLoginUserList, username])),
+  const handleAllMessage = (data: { data: MessageGroup }) => {
+    setMessageGroup(data.data);
+  };
+
+  const handleNewMessage = (data: Message) => {
+    setMessageGroup((pre) => {
+      if (!_.includes(_.keys(pre), data.groupId)) {
+        return {...pre, [data.groupId]: [data]}
+      }
+
+      pre[data.groupId] = pre[data.groupId].concat([data])
+      return {...pre}
+    });
+  };
+
+  const handleOpenWish = (data: { data: Array<Wish> }) => {
+    setWishList((pre) => data.data);
+  };
+
+  const handleNewWish = (data: Wish) => {
+    setWishList((pre) => {
+      return pre.concat([
+        {
+          _id: data._id,
+          content: data.content,
+          username: data.username,
+          voteCount: data.voteCount,
+          createdAt: data.createdAt,
+        },
+      ]);
+    });
+  };
+
+  const handleVoteWish = (data: VoteWish) => {
+    setWishList((pre) => {
+      return _.map(pre, (wish) => {
+        if (wish._id !== data.wishId) return wish;
+        return {
+          ...wish,
+          voteCount: data.newCount,
+        };
+      });
+    });
+  };
+
+  const handleLoginEvent = (
+    ws: WebSocket,
+    data: { username: string; targetUser: string },
+  ) => {
+    _handleLoginEvent(data.username);
+
+    ws.send(
+      JSON.stringify({
+        type: "logingReturnEvent",
+        username: username,
+        targetUser: data.username,
+      }),
     );
   };
 
+  const handleLoginReturnEvent = (data: { username: string }) => {
+    _handleLoginEvent(data.username);
+  };
+
+  const handlelogoutEvent = (data: { username: string }) => {
+    _handleLogoutEvent(data.username);
+  };
+
+  const handleCall = (data: { username: string; message: string }) => {
+    Alert.warning(data.message, `${data.username} call`);
+    // Alert.chainOfCalls(data.message, `${data.username} call`);
+  };
+
+  const handleErrorMessage = (data: { error: string }) => {
+    Alert.error(data.error);
+  };
+
+  const _handleLoginEvent = (username: string) => {
+    setLoginUserList((pre) => _.compact(_.uniq([...pre, username])));
+  };
+
   const _handleLogoutEvent = (username: string) => {
-    setLoginUserList((preLoginUserList) => _.pull(preLoginUserList, username));
+    setLoginUserList((pre) => {
+      return _.filter(pre, (user) => user !== username);
+    });
   };
 
   const sendMessage = (message: string) => {

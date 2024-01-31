@@ -66,7 +66,8 @@ const MessagesBox: FC<{
     boxRef.current.scrollTop = boxRef.current.scrollHeight;
   }, [currentGroupMessages]);
 
-  const generateMessage = (
+
+  const generateMessage = useCallback((
     name: string,
     message: string,
     createdAt: Date,
@@ -75,8 +76,6 @@ const MessagesBox: FC<{
   ): React.ReactElement => {
     const isCurrentUser = currentUserInfo.name === name;
     const isConsecutive = preName === name;
-
-    console.log(message, isConsecutive);
 
     return (
       <Stack
@@ -143,7 +142,7 @@ const MessagesBox: FC<{
         </Box>
       </Stack>
     );
-  };
+  }, [currentUserInfo, userMap]);
 
   const handleChangeMessage = (event: ChangeEvent<HTMLInputElement>) => {
     setMessage(event.target.value);

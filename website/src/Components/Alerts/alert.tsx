@@ -1,6 +1,12 @@
+import React, { ReactNode } from "react";
+import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import Swal from "sweetalert2";
-import withReactContent, { ReactSweetAlertOptions } from "sweetalert2-react-content";
+import withReactContent, {
+  ReactSweetAlertOptions,
+} from "sweetalert2-react-content";
 import "./style.css";
+import ChainDialog from "../Dialogs/ChainDialog";
 
 export class Alert {
   static swal = withReactContent(Swal);
@@ -31,3 +37,17 @@ export class Alert {
       confirmButtonText: "OK",
     });
   }
+
+  static async chainOfCalls(msg = "", title = "") {
+    const domNode = document.createElement("div");
+    let root = createRoot(domNode);
+    root.render(
+      <ChainDialog
+        onClose={() => {
+          root.unmount();
+        }}
+      />,
+    );
+    document.body.appendChild(domNode);
+  }
+}
