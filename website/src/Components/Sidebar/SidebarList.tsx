@@ -1,4 +1,5 @@
 import {
+  Button,
   Collapse,
   Divider,
   IconButton,
@@ -6,28 +7,17 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemButton,
-  ListItemButtonProps,
   ListItemProps,
   ListItemText,
-  Menu,
-  MenuItem,
   TextField,
 } from "@mui/material";
 import { Person as PersonIcon } from "@mui/icons-material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
-import {
-  FC,
-  FormEvent,
-  MouseEvent,
-  MouseEventHandler,
-  ReactNode,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import _ from "lodash";
 import {
+  FormButtonEvent,
   OnlineStatus,
   SendMessage,
   User,
@@ -40,9 +30,9 @@ import { useAuth } from "../../hook/useAuth";
 import { useUserOpenInfo } from "../../hook/useUserOpenInfo";
 import FormDialog from "../Dialogs/FormDialog";
 
-type ActionClickHandler = (
-  event: FormEvent<HTMLFormElement> | MouseEvent<HTMLButtonElement>,
-) => void;
+type CallHandler = (event: FormButtonEvent) => void;
+
+type ChainCall = (user: User, event: FormButtonEvent) => void;
 
 const ListPerson: FC<{
   open: boolean;
@@ -50,29 +40,70 @@ const ListPerson: FC<{
   status?: OnlineStatus;
   onItemClick: (name: string) => void;
   isCurrentUser?: boolean;
-  onActionClick: ActionClickHandler;
-}> = ({ name, status, open, onItemClick, isCurrentUser, onActionClick }) => {
+  handleLogout?: () => void;
+  handleCall?: CallHandler;
+  handleChainCall?: CallHandler;
+}> = ({
+  name,
+  status,
+  open,
+  onItemClick,
+  isCurrentUser,
+  handleLogout = () => {},
+  handleCall = () => {},
+  handleChainCall = () => {},
+}) => {
   const [isCallDialogOpen, setIsCallDialogOpen] = useState(false);
+
+  const [callClickCount, setCallClickCount] = useState(4);
+  const [isCountingCall, setIsCoutingCall] = useState(false);
+
+  let callClickCountingTimeout: ReturnType<typeof setTimeout>;
+
+  const setCallClickCountTimeout = () => {
+    if (callClickCountingTimeout) {
+      clearTimeout(callClickCountingTimeout);
+    }
+
+    setCallClickCount(0);
+
+    callClickCountingTimeout = setTimeout(() => {
+      setIsCoutingCall(false);
+    }, 60 * 1000);
+  };
 
   const handleClick = () => {
     setIsCallDialogOpen(true);
   };
+
   const handleClose = () => {
     setIsCallDialogOpen(false);
+  };
+
+  const handleSubmit = (event: FormButtonEvent) => {
+    if (isCountingCall) {
+      setCallClickCount((pre) => pre + 1);
+    } else {
+      setIsCoutingCall(true);
+      setCallClickCountTimeout();
+    }
+
+    if (!handleCall) return;
+    handleCall(event);
   };
 
   let itemProps: ListItemProps = {};
   if (open) {
     if (isCurrentUser) {
       itemProps["secondaryAction"] = (
-        <IconButton onClick={onActionClick} color="inherit">
-          {isCurrentUser ? <LogoutIcon /> : <NotificationsActiveIcon />}
+        <IconButton onClick={handleLogout} color="inherit">
+          <LogoutIcon />
         </IconButton>
       );
     } else {
       itemProps["secondaryAction"] = (
         <IconButton onClick={handleClick} color="inherit">
-          {isCurrentUser ? <LogoutIcon /> : <NotificationsActiveIcon />}
+          <NotificationsActiveIcon />
         </IconButton>
       );
     }
@@ -110,7 +141,16 @@ const ListPerson: FC<{
         title="Call"
         open={isCallDialogOpen}
         onClose={handleClose}
-        onSubmit={onActionClick}
+        onClick={handleSubmit}
+        customButton={
+          callClickCount >= 3 ? (
+            <Button type="submit" name="chainCall" onClick={handleChainCall}>
+              Chain call
+            </Button>
+          ) : (
+            ""
+          )
+        }
       >
         <TextField
           fullWidth
@@ -168,19 +208,41 @@ const SidebarList: FC<{
     logout();
   };
 
-  const handleCall = (user: User, event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const sendCall = (
+    type: "call" | "chainCall" = "call",
+    user: User,
+    event: FormButtonEvent,
+  ) => {
+    const form = event.currentTarget.form;
+    if (!form) return;
 
-    const data = new FormData(event.currentTarget);
+    const data = new FormData(form);
     sendMessage(
       JSON.stringify({
-        type: "call",
+        type: type,
         targetUser: user.name,
         username: currentUserInfo.name,
         message: data.get("callMessage"),
       }),
     );
   };
+
+  const handleCall: ChainCall = useCallback(
+    (user, event) => {
+      console.log("handleCall");
+      event.preventDefault();
+      sendCall("call", user, event);
+    },
+    [sendCall],
+  );
+
+  const handleChainCall: ChainCall = useCallback(
+    (user, event) => {
+      event.preventDefault();
+      sendCall("chainCall", user, event);
+    },
+    [sendCall],
+  );
 
   useEffect(() => {
     setFilterdUserList(otherUserList);
@@ -195,7 +257,7 @@ const SidebarList: FC<{
           onItemClick={onItemClick}
           status={OnlineStatus.Online}
           isCurrentUser={true}
-          onActionClick={handleLogout}
+          handleLogout={handleLogout}
         />
         <Divider />
 
@@ -211,8 +273,9 @@ const SidebarList: FC<{
               name={user.name}
               onItemClick={onItemClick}
               status={user.status}
-              onActionClick={(event) =>
-                handleCall(user, event as FormEvent<HTMLFormElement>)
+              handleCall={(event: FormButtonEvent) => handleCall(user, event)}
+              handleChainCall={(event: FormButtonEvent) =>
+                handleChainCall(user, event)
               }
             />
           ))}

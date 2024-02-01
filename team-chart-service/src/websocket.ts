@@ -125,6 +125,15 @@ export const setupWebsocket = (wss: WebSocketServer) => {
           });
           return;
         }
+
+        if (data.type === "chainCall") {
+          broadcastTo(data.targetUser, {
+            type: "chainCall",
+            username: data.username,
+            message: data.message,
+          });
+          return;
+        }
       } catch (error) {
         ws.send(
           JSON.stringify({

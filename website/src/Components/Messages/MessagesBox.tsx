@@ -66,83 +66,85 @@ const MessagesBox: FC<{
     boxRef.current.scrollTop = boxRef.current.scrollHeight;
   }, [currentGroupMessages]);
 
+  const generateMessage = useCallback(
+    (
+      name: string,
+      message: string,
+      createdAt: Date,
+      preName: string | undefined,
+      index: number,
+    ): React.ReactElement => {
+      const isCurrentUser = currentUserInfo.name === name;
+      const isConsecutive = preName === name;
 
-  const generateMessage = useCallback((
-    name: string,
-    message: string,
-    createdAt: Date,
-    preName: string | undefined,
-    index: number,
-  ): React.ReactElement => {
-    const isCurrentUser = currentUserInfo.name === name;
-    const isConsecutive = preName === name;
-
-    return (
-      <Stack
-        key={`message-${index}`}
-        spacing={1}
-        sx={{
-          mx: 2,
-          mt: isConsecutive ? 1.5 : 2,
-          alignItems: isCurrentUser ? "flex-end" : "flex-start",
-        }}
-      >
+      return (
         <Stack
-          direction="row"
+          key={`message-${index}`}
           spacing={1}
           sx={{
-            display: isConsecutive || isCurrentUser ? "none" : "flex",
-            alignItems: "center",
-            pt: 2,
+            mx: 2,
+            mt: isConsecutive ? 1.5 : 2,
+            alignItems: isCurrentUser ? "flex-end" : "flex-start",
           }}
         >
-          <RippleAvatar status={userMap[name]?.status}>{name}</RippleAvatar>
-          <Typography sx={{ fontWeight: "bold" }}>{name}</Typography>
-        </Stack>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              display: isConsecutive || isCurrentUser ? "none" : "flex",
+              alignItems: "center",
+              pt: 2,
+            }}
+          >
+            <RippleAvatar status={userMap[name]?.status}>{name}</RippleAvatar>
+            <Typography sx={{ fontWeight: "bold" }}>{name}</Typography>
+          </Stack>
 
-        <Box
-          sx={{
-            borderWidth: 1,
-            borderStyle: "solid",
-            borderColor: "rgba(0, 0, 0, 0.12)",
-            borderRadius: "7%",
-            ml: 8,
-            width: "fit-content",
-            maxWidth: "100%",
-            p: 1,
-            backgroundColor: (theme) =>
-              isCurrentUser
-                ? theme.palette.secondary.light
-                : theme.palette.primary.light,
-            position: "relative",
-          }}
-        >
-          <Typography
-            variant="body2"
+          <Box
             sx={{
-              position: "absolute",
-              [isCurrentUser ? "left" : "right"]: 0,
-              bottom: -20,
-            }}
-          >
-            {moment(createdAt).format("kk:mm")}
-          </Typography>
-          <Typography
-            sx={{
+              borderWidth: 1,
+              borderStyle: "solid",
+              borderColor: "rgba(0, 0, 0, 0.12)",
+              borderRadius: "7%",
+              ml: 8,
               width: "fit-content",
-              textAlign: "start",
               maxWidth: "100%",
-              wordBreak: "break-all",
-              whiteSpace: "pre-wrap",
-              color: (theme) => theme.palette.text.primary,
+              p: 1,
+              backgroundColor: (theme) =>
+                isCurrentUser
+                  ? theme.palette.secondary.light
+                  : theme.palette.primary.light,
+              position: "relative",
             }}
           >
-            {message}
-          </Typography>
-        </Box>
-      </Stack>
-    );
-  }, [currentUserInfo, userMap]);
+            <Typography
+              variant="body2"
+              sx={{
+                position: "absolute",
+                [isCurrentUser ? "left" : "right"]: 0,
+                bottom: -20,
+              }}
+            >
+              {moment(createdAt).format("kk:mm")}
+            </Typography>
+            <Typography
+              sx={{
+                width: "fit-content",
+                textAlign: "start",
+                maxWidth: "100%",
+                wordBreak: "break-all",
+                whiteSpace: "pre-wrap",
+                color: (theme) => theme.palette.text.primary,
+              }}
+            >
+              {message}
+            </Typography>
+          </Box>
+        </Stack>
+      );
+    },
+    [currentUserInfo, userMap],
+  );
 
   const handleChangeMessage = (event: ChangeEvent<HTMLInputElement>) => {
     setMessage(event.target.value);

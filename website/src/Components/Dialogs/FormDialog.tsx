@@ -5,7 +5,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
-import { FC } from "react";
+import { FC, FormEvent, MouseEvent, useRef } from "react";
 import { FormDialogProps } from "../../types/commonTypes";
 
 const FormDialog: FC<FormDialogProps> = ({
@@ -13,7 +13,8 @@ const FormDialog: FC<FormDialogProps> = ({
   onClose,
   title,
   children,
-  onSubmit,
+  onClick,
+  customButton,
 }) => {
   return (
     <>
@@ -23,17 +24,23 @@ const FormDialog: FC<FormDialogProps> = ({
         maxWidth="md"
         PaperProps={{
           component: "form",
-          onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
-            onSubmit(event);
-            onClose();
-          },
         }}
       >
         <DialogTitle>{title}</DialogTitle>
         <DialogContent sx={{ width: 900 }}>{children}</DialogContent>
         <DialogActions>
+          {customButton ? customButton : ""}
           <Button onClick={onClose}>Cancel</Button>
-          <Button color="secondary" type="submit">
+          <Button
+            color="secondary"
+            type="submit"
+            name="call"
+            onClick={(event) => {
+              // event.preventDefault();
+              onClick(event);
+              onClose();
+            }}
+          >
             Send
           </Button>
         </DialogActions>

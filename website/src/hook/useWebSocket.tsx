@@ -63,6 +63,11 @@ const useWebSocket = (url: string, username: string) => {
           handleCall(data);
           break;
 
+        case "chainCall":
+          console.log("chainCall");
+          handleChainCall(data);
+          break;
+
         case "errorMessage":
           handleErrorMessage(data);
           break;
@@ -88,11 +93,11 @@ const useWebSocket = (url: string, username: string) => {
   const handleNewMessage = (data: Message) => {
     setMessageGroup((pre) => {
       if (!_.includes(_.keys(pre), data.groupId)) {
-        return {...pre, [data.groupId]: [data]}
+        return { ...pre, [data.groupId]: [data] };
       }
 
-      pre[data.groupId] = pre[data.groupId].concat([data])
-      return {...pre}
+      pre[data.groupId] = pre[data.groupId].concat([data]);
+      return { ...pre };
     });
   };
 
@@ -151,7 +156,10 @@ const useWebSocket = (url: string, username: string) => {
 
   const handleCall = (data: { username: string; message: string }) => {
     Alert.warning(data.message, `${data.username} call`);
-    // Alert.chainOfCalls(data.message, `${data.username} call`);
+  };
+
+  const handleChainCall = (data: { username: string; message: string }) => {
+    Alert.chainOfCalls(data.message, `${data.username} call`);
   };
 
   const handleErrorMessage = (data: { error: string }) => {

@@ -19,6 +19,7 @@ import PlusOneIcon from "@mui/icons-material/PlusOne";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import _ from "lodash";
 import {
+  FormButtonEvent,
   SendMessage,
   UserMap,
   UserOpenInfo,
@@ -99,10 +100,13 @@ const WishBoard: FC<{
     setIsCreateWishOpen(false);
   };
 
-  const saveWish = (event: FormEvent<HTMLFormElement>) => {
+  const saveWish = (event: FormButtonEvent) => {
     event.preventDefault();
 
-    const data = new FormData(event.currentTarget);
+    const form = event.currentTarget.form;
+    if (!form) return;
+
+    const data = new FormData(form);
     sendMessage(
       JSON.stringify({
         type: "newWish",
@@ -162,7 +166,7 @@ const WishBoard: FC<{
         title="Create Wish"
         open={isCreateWishOpen}
         onClose={closeCreateWish}
-        onSubmit={saveWish}
+        onClick={saveWish}
       >
         <TextField
           fullWidth

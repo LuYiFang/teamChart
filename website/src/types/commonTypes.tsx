@@ -105,7 +105,8 @@ export interface FormDialogProps {
   onClose: () => void;
   title?: string;
   children: ReactNode;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onClick: (event: FormEvent<HTMLButtonElement>) => void;
+  customButton?: ReactNode;
 }
 
 export type SendMessage = (message: string) => void;
@@ -114,3 +115,5 @@ export interface VoteWish {
   wishId: string;
   newCount: number;
 }
+
+export type FormButtonEvent = FormEvent<HTMLButtonElement>;

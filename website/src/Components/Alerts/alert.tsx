@@ -6,7 +6,9 @@ import withReactContent, {
   ReactSweetAlertOptions,
 } from "sweetalert2-react-content";
 import "./style.css";
-import ChainDialog from "../Dialogs/ChainDialog";
+import { SingleDialog } from "../Dialogs/ChainDialog";
+import { Backdrop } from "@mui/material";
+import _ from "lodash";
 
 export class Alert {
   static swal = withReactContent(Swal);
@@ -38,16 +40,59 @@ export class Alert {
     });
   }
 
+  static delay = () => {
+    return new Promise((reslove) => setTimeout(reslove, 50));
+  };
+
   static async chainOfCalls(msg = "", title = "") {
-    const domNode = document.createElement("div");
-    let root = createRoot(domNode);
-    root.render(
-      <ChainDialog
-        onClose={() => {
-          root.unmount();
-        }}
-      />,
-    );
-    document.body.appendChild(domNode);
+    const chainCallId = "chain-calls";
+
+    // close existing swal
+    this.swal.fire({
+      showConfirmButton: false,
+      timer: 1,
+    });
+
+    let domNode = document.getElementById(chainCallId);
+    if (domNode) {
+      domNode.innerHTML = "";
+    } else {
+      domNode = document.createElement("div");
+      domNode.id = chainCallId;
+    }
+
+    const root = createRoot(domNode);
+
+    for (let i = 0; i < 9; i++) {
+      root.render(
+        <div className="chain">
+          {_.map(_.range(i + 1), (_i) => {
+            if (_i === 0) {
+              return (
+                <Backdrop
+                  open={true}
+                  sx={{ zIndex: (theme) => theme.zIndex.drawer + 3 }}
+                />
+              );
+            }
+            return (
+              <SingleDialog
+                key={`chain-dialog-${_i}`}
+                title={title}
+                msg={msg}
+                index={`${_i}`}
+                onClose={() => {
+                  root.unmount();
+                  domNode?.remove();
+                }}
+              />
+            );
+          })}
+        </div>,
+      );
+      document.body.appendChild(domNode);
+
+      await Alert.delay();
+    }
   }
 }
