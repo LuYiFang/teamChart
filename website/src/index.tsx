@@ -6,14 +6,17 @@ import reportWebVitals from "./reportWebVitals";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import theme from "./themes/theme";
 import { RouterProvider } from "react-router-dom";
+import { SnackbarProvider } from "notistack";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement,
 );
 root.render(
   <ThemeProvider theme={theme}>
-    <CssBaseline />
-    <RouterProvider router={router}></RouterProvider>
+    <SnackbarProvider maxSnack={10}>
+      <CssBaseline />
+      <RouterProvider router={router}></RouterProvider>
+    </SnackbarProvider>
   </ThemeProvider>,
 );
 

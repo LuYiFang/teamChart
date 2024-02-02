@@ -2,7 +2,6 @@ import {
   ChangeEvent,
   FC,
   KeyboardEvent,
-  SyntheticEvent,
   useCallback,
   useEffect,
   useMemo,
@@ -13,17 +12,12 @@ import {
   Alert,
   Box,
   IconButton,
-  Slide,
-  SlideProps,
-  Snackbar,
-  SnackbarCloseReason,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import {
   Clear as ClearIcon,
-  Person as PersonIcon,
   Send as SendIcon,
 } from "@mui/icons-material";
 import {
@@ -36,6 +30,11 @@ import { groupPublic } from "../../Utility/contants";
 import _ from "lodash";
 import RippleAvatar from "../Avatars/RippleAvatar";
 import moment from "moment";
+import {
+  SnackbarKey,
+  SnackbarMessage,
+  useSnackbar,
+} from "notistack";
 
 const MessagesBox: FC<{
   currentUserInfo: UserOpenInfo;
@@ -50,9 +49,10 @@ const MessagesBox: FC<{
   messageGroup,
   userMap,
 }) => {
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
   const [textValue, setTextValue] = useState("");
   const [message, setMessage] = useState("");
-  const [isBroadcastOpen, setIsBroadcastOpen] = useState(false);
 
   const boxRef = useRef<HTMLDivElement>(null);
 
@@ -183,23 +183,44 @@ const MessagesBox: FC<{
   const handlePublicBroadcast = () => {
     if (currentGroup !== groupPublic) return;
 
-    setIsBroadcastOpen(true);
-  };
-
-  const handleBroadcastClose = () => {
-    setIsBroadcastOpen(false);
-  };
-
-  const SlideTransition = (props: SlideProps) => {
-    return <Slide {...props} direction="down" />;
-  };
-
-  const handleClose = (
-    event: Event | SyntheticEvent,
-    reason: SnackbarCloseReason,
-  ) => {
-    if (reason === "clickaway") return;
-    setIsBroadcastOpen(false);
+    enqueueSnackbar(message, {
+      variant: "info",
+      anchorOrigin: { vertical: "top", horizontal: "center" },
+      content: (key: SnackbarKey, message: SnackbarMessage) => (
+        <Alert
+          id={`${key}`}
+          severity="info"
+          action={
+            <IconButton
+              sx={{ color: "white" }}
+              onClick={() => closeSnackbar(key)}
+            >
+              <ClearIcon />
+            </IconButton>
+          }
+          sx={{
+            "& .MuiAlert-action": {
+              pt: 0,
+            },
+            "&": {
+              backgroundColor: (theme) => theme.palette.primary.dark,
+              color: "white",
+            },
+            "& .MuiAlert-icon": {
+              color: "white",
+            },
+            "& .MuiAlert-message": {
+              whiteSpace: "pre-wrap",
+              overflowWrap: "break-word",
+              maxWidth: "70vw",
+              textAlign: "left",
+            },
+          }}
+        >
+          {message}
+        </Alert>
+      ),
+    });
   };
 
   return (
@@ -291,43 +312,6 @@ const MessagesBox: FC<{
           </IconButton>
         </Box>
       </Box>
-      <Snackbar
-        open={isBroadcastOpen}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        autoHideDuration={6000}
-        onClose={handleClose}
-        TransitionComponent={SlideTransition}
-        key={message}
-      >
-        <Alert
-          severity="info"
-          action={
-            <IconButton sx={{ color: "white" }} onClick={handleBroadcastClose}>
-              <ClearIcon />
-            </IconButton>
-          }
-          sx={{
-            "& .MuiAlert-action": {
-              pt: 0,
-            },
-            "&": {
-              backgroundColor: (theme) => theme.palette.primary.dark,
-              color: "white",
-            },
-            "& .MuiAlert-icon": {
-              color: "white",
-            },
-            "& .MuiAlert-message": {
-              whiteSpace: "pre-wrap",
-              overflowWrap: "break-word",
-              maxWidth: "70vw",
-              textAlign: "left",
-            },
-          }}
-        >
-          {message}
-        </Alert>
-      </Snackbar>
     </>
   );
 };
