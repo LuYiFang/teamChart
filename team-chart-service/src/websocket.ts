@@ -110,10 +110,15 @@ export const setupWebsocket = (wss: WebSocketServer) => {
         }
 
         if (data.type === "logoutEvent") {
-          broadcastToAll(wss, ws, {
-            type: "logoutEvent",
-            username: data.username,
-          }, false);
+          broadcastToAll(
+            wss,
+            ws,
+            {
+              type: "logoutEvent",
+              username: data.username,
+            },
+            false,
+          );
           return;
         }
 
@@ -129,6 +134,15 @@ export const setupWebsocket = (wss: WebSocketServer) => {
         if (data.type === "chainCall") {
           broadcastTo(data.targetUser, {
             type: "chainCall",
+            username: data.username,
+            message: data.message,
+          });
+          return;
+        }
+
+        if (data.type === "broadcast") {
+          broadcastToAll(wss, ws, {
+            type: "broadcast",
             username: data.username,
             message: data.message,
           });

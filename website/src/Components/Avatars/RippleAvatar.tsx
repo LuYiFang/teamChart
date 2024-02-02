@@ -24,7 +24,7 @@ const StyledBadge = styled(Badge)<{ status: OnlineStatus | undefined }>(({
   };
 });
 
-const RippleStyledAvatar = styled(Avatar)<RippleAvatarProps>(({
+export const RippleStyledAvatar = styled(Avatar)<RippleAvatarProps>(({
   theme,
   active,
   iscurrentuser,

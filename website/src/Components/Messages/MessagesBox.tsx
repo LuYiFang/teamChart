@@ -16,10 +16,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import {
-  Clear as ClearIcon,
-  Send as SendIcon,
-} from "@mui/icons-material";
+import { Send as SendIcon } from "@mui/icons-material";
 import {
   MessageGroup,
   SendMessage,
@@ -30,11 +27,6 @@ import { groupPublic } from "../../Utility/contants";
 import _ from "lodash";
 import RippleAvatar from "../Avatars/RippleAvatar";
 import moment from "moment";
-import {
-  SnackbarKey,
-  SnackbarMessage,
-  useSnackbar,
-} from "notistack";
 
 const MessagesBox: FC<{
   currentUserInfo: UserOpenInfo;
@@ -49,8 +41,6 @@ const MessagesBox: FC<{
   messageGroup,
   userMap,
 }) => {
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-
   const [textValue, setTextValue] = useState("");
   const [message, setMessage] = useState("");
 
@@ -183,44 +173,13 @@ const MessagesBox: FC<{
   const handlePublicBroadcast = () => {
     if (currentGroup !== groupPublic) return;
 
-    enqueueSnackbar(message, {
-      variant: "info",
-      anchorOrigin: { vertical: "top", horizontal: "center" },
-      content: (key: SnackbarKey, message: SnackbarMessage) => (
-        <Alert
-          id={`${key}`}
-          severity="info"
-          action={
-            <IconButton
-              sx={{ color: "white" }}
-              onClick={() => closeSnackbar(key)}
-            >
-              <ClearIcon />
-            </IconButton>
-          }
-          sx={{
-            "& .MuiAlert-action": {
-              pt: 0,
-            },
-            "&": {
-              backgroundColor: (theme) => theme.palette.primary.dark,
-              color: "white",
-            },
-            "& .MuiAlert-icon": {
-              color: "white",
-            },
-            "& .MuiAlert-message": {
-              whiteSpace: "pre-wrap",
-              overflowWrap: "break-word",
-              maxWidth: "70vw",
-              textAlign: "left",
-            },
-          }}
-        >
-          {message}
-        </Alert>
-      ),
-    });
+    sendMessage(
+      JSON.stringify({
+        type: "broadcast",
+        username: currentUserInfo.name,
+        message: message,
+      }),
+    );
   };
 
   return (

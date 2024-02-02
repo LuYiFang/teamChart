@@ -3,8 +3,12 @@ import { Message, MessageGroup, VoteWish, Wish } from "../types/commonTypes";
 import _ from "lodash";
 import { getStorage } from "../Utility/utility";
 import { Alert } from "../Components/Alerts/alert";
+import { SnackbarKey, SnackbarMessage, useSnackbar } from "notistack";
+import BroadcastInfo from "../Components/Alerts/BroadcastInfo";
 
 const useWebSocket = (url: string, username: string) => {
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [loginUserList, setLoginUserList] = useState<Array<string>>([]);
   const [messageGroup, setMessageGroup] = useState<MessageGroup>({});
@@ -64,8 +68,11 @@ const useWebSocket = (url: string, username: string) => {
           break;
 
         case "chainCall":
-          console.log("chainCall");
           handleChainCall(data);
+          break;
+
+        case "broadcast":
+          handleBroadcast(data);
           break;
 
         case "errorMessage":
@@ -160,6 +167,21 @@ const useWebSocket = (url: string, username: string) => {
 
   const handleChainCall = (data: { username: string; message: string }) => {
     Alert.chainOfCalls(data.message, `${data.username} call`);
+  };
+
+  const handleBroadcast = (data: { username: string; message: string }) => {
+    enqueueSnackbar(data.message, {
+      variant: "info",
+      anchorOrigin: { vertical: "top", horizontal: "center" },
+      content: (key: SnackbarKey, message: SnackbarMessage) => (
+        <BroadcastInfo
+          key={`${key}`}
+          message={`${message}`}
+          username={data.username}
+          onClose={() => closeSnackbar(key)}
+        />
+      ),
+    });
   };
 
   const handleErrorMessage = (data: { error: string }) => {

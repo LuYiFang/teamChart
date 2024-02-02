@@ -55,7 +55,7 @@ const ListPerson: FC<{
 }) => {
   const [isCallDialogOpen, setIsCallDialogOpen] = useState(false);
 
-  const [callClickCount, setCallClickCount] = useState(4);
+  const [callClickCount, setCallClickCount] = useState(0);
   const [isCountingCall, setIsCoutingCall] = useState(false);
 
   let callClickCountingTimeout: ReturnType<typeof setTimeout>;
