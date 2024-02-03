@@ -60,6 +60,13 @@ const ListPerson: FC<{
 
   let callClickCountingTimeout: ReturnType<typeof setTimeout>;
 
+  const checkChainCallAvalible = useCallback(
+    _.debounce(() => {
+      return callClickCount >= 3;
+    }, 500),
+    [callClickCount],
+  );
+
   const setCallClickCountTimeout = () => {
     if (callClickCountingTimeout) {
       clearTimeout(callClickCountingTimeout);
@@ -109,9 +116,6 @@ const ListPerson: FC<{
     }
   }
 
-  let actionList = ["Call"];
-  if (isCurrentUser) actionList = ["Logout"];
-
   return (
     <>
       <ListItem {...itemProps}>
@@ -143,7 +147,7 @@ const ListPerson: FC<{
         onClose={handleClose}
         onClick={handleSubmit}
         customButton={
-          callClickCount >= 3 ? (
+          checkChainCallAvalible() ? (
             <Button type="submit" name="chainCall" onClick={handleChainCall}>
               Chain call
             </Button>
