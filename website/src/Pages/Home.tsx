@@ -44,15 +44,18 @@ const Home = () => {
       );
     }
 
+    const sortedUsers = _.sortBy(users, (user) =>
+      user.username === userOpenInfo.name ? "-" : user.username,
+    );
     setUserGroup(
-      _.map(_.map(users, "username"), (name, i) => ({
+      _.map(_.map(sortedUsers, "username"), (name, i) => ({
         id: `graggable-user-${name}`,
         name: name,
         group: groupSilence,
         status: loginUserMap[name] ? OnlineStatus.Online : OnlineStatus.Offline,
       })),
     );
-  }, [users, loginUserList]);
+  }, [users, loginUserList, userOpenInfo.name]);
 
   useEffect(() => {
     setTabIndex(currentGroup === groupSilence ? 1 : 0);

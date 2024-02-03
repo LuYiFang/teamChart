@@ -11,13 +11,14 @@ import { root } from "../Utility/routePath";
 import { Suspense, useEffect } from "react";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { Alert } from "./Alerts/alert";
+import { User } from "../types/commonTypes";
 
-type ContextType = { users: Array<string> };
+type ContextType = { users: Record<string, any> };
 
 const Protectedayout = () => {
   const { user } = useAuth();
   const { usersPromise } = useLoaderData() as {
-    usersPromise: Promise<Array<string>>;
+    usersPromise: Promise<Record<string, any>>;
   };
 
   if (!user) {

@@ -132,6 +132,7 @@ const WishBoard: FC<{
         <Box
           sx={{
             height: "calc( 100vh - 64px - 48px)",
+            overflowY: "auto",
           }}
         >
           <Stack spacing={2} p={3}>
