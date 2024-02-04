@@ -11,6 +11,9 @@ const useWebSocket = (url: string, username: string) => {
 
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [loginUserList, setLoginUserList] = useState<Array<string>>([]);
+  const [userGroupMap, setUserGroupMap] = useState<{
+    [username: string]: string;
+  }>({});
   const [messageGroup, setMessageGroup] = useState<MessageGroup>({});
   const [wishList, setWishList] = useState<Array<Wish>>([]);
 
@@ -42,6 +45,10 @@ const useWebSocket = (url: string, username: string) => {
           handleNewMessage(data);
           break;
 
+        case "movingGroup":
+          handleMovingGroup(data);
+          break;
+
         case "openWish":
           handleOpenWish(data);
           break;
@@ -58,7 +65,6 @@ const useWebSocket = (url: string, username: string) => {
         case "logingReturnEvent":
           handleLoginReturnEvent(data);
           break;
-
         case "logoutEvent":
           handlelogoutEvent(data);
           break;
@@ -66,7 +72,6 @@ const useWebSocket = (url: string, username: string) => {
         case "call":
           handleCall(data);
           break;
-
         case "chainCall":
           handleChainCall(data);
           break;
@@ -108,6 +113,10 @@ const useWebSocket = (url: string, username: string) => {
     });
   };
 
+  const handleMovingGroup = (data: { username: string; groupId: string }) => {
+    setUserGroupMap((pre) => ({ ...pre, [data.username]: data.groupId }));
+  };
+
   const handleOpenWish = (data: { data: Array<Wish> }) => {
     setWishList((pre) => data.data);
   };
@@ -143,7 +152,6 @@ const useWebSocket = (url: string, username: string) => {
     data: { username: string; targetUser: string },
   ) => {
     _handleLoginEvent(data.username);
-
     ws.send(
       JSON.stringify({
         type: "logingReturnEvent",
@@ -219,6 +227,7 @@ const useWebSocket = (url: string, username: string) => {
     messageGroup,
     loginUserList,
     wishList,
+    userGroupMap,
   };
 };
 

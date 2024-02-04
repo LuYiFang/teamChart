@@ -16,10 +16,8 @@ const Home = () => {
   const { users } = useUsers();
   const { userOpenInfo } = useUserOpenInfo();
 
-  const { sendMessage, messageGroup, loginUserList, wishList } = useWebSocket(
-    webSocketRoot,
-    userOpenInfo.name,
-  );
+  const { sendMessage, messageGroup, loginUserList, wishList, userGroupMap } =
+    useWebSocket(webSocketRoot, userOpenInfo.name);
 
   const [isMembersOpen, setIsMembersOpen] = useState(false);
   const [isMessageOpen, setIsMessageOpen] = useState(true);
@@ -51,11 +49,11 @@ const Home = () => {
       _.map(_.map(sortedUsers, "username"), (name, i) => ({
         id: `graggable-user-${name}`,
         name: name,
-        group: groupSilence,
+        group: userGroupMap[name] || groupSilence,
         status: loginUserMap[name] ? OnlineStatus.Online : OnlineStatus.Offline,
       })),
     );
-  }, [users, loginUserList, userOpenInfo.name]);
+  }, [users, loginUserList, userOpenInfo.name, userGroupMap]);
 
   useEffect(() => {
     setTabIndex(currentGroup === groupSilence ? 1 : 0);
@@ -74,6 +72,14 @@ const Home = () => {
         group: destination.droppableId,
       };
     });
+
+    sendMessage(
+      JSON.stringify({
+        type: "movingGroup",
+        username: userOpenInfo.name,
+        groupId: destination.droppableId,
+      }),
+    );
 
     setUserGroup(newUserGroup);
   };
