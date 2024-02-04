@@ -1,8 +1,3 @@
-import { Request, Response } from "express";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
-import { SECRET_KEY, saltRounds } from "../utils/constants";
-import UserModel from "../models/userModel";
 import MessageModel from "../models/messageModel";
 import WishModel, { WishVoteModel } from "../models/wishModel";
 import mongoose from "mongoose";

@@ -1,9 +1,5 @@
 import { WebSocket, Server as WebSocketServer } from "ws";
-import MessageModel from "./models/messageModel";
-import { verifyToken } from "./utils/auth";
-import _, { compact } from "lodash";
-import UserModel from "./models/userModel";
-import ChartController from "./controllers/chartControllers";
+import _ from "lodash";
 import WebSocketController from "./controllers/webSocketController";
 
 const userSocketMap = new Map<string, WebSocket>();
